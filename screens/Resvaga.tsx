@@ -1,0 +1,193 @@
+import { useEffect, useState } from 'react';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Platform } from 'react-native';
+import { TextInput } from 'react-native-paper';
+import { auth, firestore } from '../firebase';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import styles from '../estilo';
+
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Resvaga } from '../model/Resvaga';
+
+export default function CadastroResvaga() {
+  const [formResvaga, setFormResvaga] = useState<Partial<Resvaga>>({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dataSelecionada, setDataSelecionada] = useState<Date | undefined>(undefined);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [horaSelecionada, setHoraSelecionada] = useState<Date | undefined>(undefined);
+
+  const navigation = useNavigation();
+  const route = useRoute<any>();
+
+  useEffect(() => {
+    if (route.params) {
+      setFormResvaga(route.params.resvaga);
+      if (route.params.resvaga?.data) {
+        const partes = route.params.resvaga.data.split('/');
+        const data = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+        setDataSelecionada(data);
+      }
+      if (route.params.resvaga?.hora) {
+        // create a date with today and set time
+        const [h, m] = route.params.resvaga.hora.split(':').map(Number);
+        const dt = new Date();
+        dt.setHours(h, m, 0, 0);
+        setHoraSelecionada(dt);
+      }
+    }
+  }, [route.params]);
+
+  const salvar = async () => {
+    // validação básica: todos os campos devem estar preenchidos
+    if (!formResvaga.tipo || !formResvaga.vaga || !formResvaga.data || !formResvaga.hora) {
+      alert('Por favor, preencha todos os campos antes de salvar.');
+      return;
+    }
+
+    try {
+      const refResvaga = firestore
+        .collection("Usuario")
+        .doc(auth.currentUser?.uid)
+        .collection("Resvaga");
+
+      const novoResvaga = new Resvaga(formResvaga);
+
+      if (formResvaga.id) {
+        const idResvaga = refResvaga.doc(formResvaga.id);
+        await idResvaga.update(novoResvaga.toFirestore());
+        alert('Reserva atualizada com sucesso!');
+      } else {
+        const idResvaga = refResvaga.doc();
+        novoResvaga.id = idResvaga.id;
+        await idResvaga.set(novoResvaga.toFirestore());
+        alert('Reserva feita com sucesso!');
+      }
+
+      setFormResvaga({});
+      setDataSelecionada(undefined);
+    } catch (e) {
+      console.error("Erro ao salvar reserva:", e);
+      alert("Erro ao salvar reserva!");
+    }
+  };
+
+  
+  const onChangeData = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDataSelecionada(selectedDate);
+      const dataFormatada = selectedDate.toLocaleDateString('pt-BR');
+      setFormResvaga({
+        ...formResvaga,
+        data: dataFormatada,
+      });
+    }
+  };
+
+  const onChangeHora = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      setHoraSelecionada(selectedTime);
+      // format as HH:MM
+      const horaFormatada = selectedTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      setFormResvaga({
+        ...formResvaga,
+        hora: horaFormatada,
+      });
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView behavior='padding' style={styles.container}>
+      <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+        <Text style={styles.titulo}>RESERVA DE VAGAS DE ESTACIONAMENTO</Text>
+
+        <View style={styles.inputView}>
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Tipo de Vaga</Text>
+          <Picker
+            selectedValue={formResvaga.tipo}
+            onValueChange={valor => setFormResvaga({ ...formResvaga, tipo: valor })}
+            style={{ backgroundColor: '#fff', marginTop: 5 }}
+          >
+            <Picker.Item label="Selecione..." value="" />
+            <Picker.Item label="Normal" value="normal" />
+            <Picker.Item label="Deficiente" value="deficiente" />
+            <Picker.Item label="Idoso" value="idoso" />
+          </Picker>
+
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Tipo de Veículo</Text>
+          <Picker
+            selectedValue={formResvaga.vaga}
+            onValueChange={valor => setFormResvaga({ ...formResvaga, vaga: valor })}
+            style={{ backgroundColor: '#fff', marginTop: 5 }}
+          >
+            <Picker.Item label="Selecione..." value="" />
+            <Picker.Item label="Carro" value="carro" />
+            <Picker.Item label="Moto" value="moto" />
+            <Picker.Item label="Van" value="van" />
+          </Picker>
+
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Data da Reserva</Text>
+
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TextInput
+              label="Data da Reserva"
+              value={formResvaga.data || ''}
+              editable={false}
+              style={styles.input}
+              activeUnderlineColor="#e9ce33ff"
+              right={<TextInput.Icon icon="calendar" />}
+            />
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={dataSelecionada || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+              onChange={onChangeData}
+              minimumDate={new Date()}
+            />
+          )}
+
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Hora da Reserva</Text>
+
+          <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+            <TextInput
+              label="Hora da Reserva"
+              value={formResvaga.hora || ''}
+              editable={false}
+              style={styles.input}
+              activeUnderlineColor="#e9ce33ff"
+              right={<TextInput.Icon icon="clock" />}
+            />
+          </TouchableOpacity>
+
+          {showTimePicker && (
+            <DateTimePicker
+              value={horaSelecionada || new Date()}
+              mode="time"
+              display={Platform.OS === 'ios' ? 'spinner' : 'clock'}
+              onChange={onChangeHora}
+            />
+          )}
+        </View>
+
+        <View style={styles.buttonView}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              !(formResvaga.tipo && formResvaga.vaga && formResvaga.data && formResvaga.hora) && { backgroundColor: '#aaa' },
+            ]}
+            onPress={salvar}
+            disabled={!(formResvaga.tipo && formResvaga.vaga && formResvaga.data && formResvaga.hora)}
+          >
+            <Text style={styles.buttonText}>Salvar</Text>
+          </TouchableOpacity>
+
+          
+        </View>
+      </ImageBackground>
+    </KeyboardAvoidingView>
+  );
+}
