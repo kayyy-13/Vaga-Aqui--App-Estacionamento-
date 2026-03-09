@@ -15,6 +15,10 @@ export default function CadastroResvaga() {
   const [dataSelecionada, setDataSelecionada] = useState<Date | undefined>(undefined);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [horaSelecionada, setHoraSelecionada] = useState<Date | undefined>(undefined);
+  const [vagasDisponiveis, setVagasDisponiveis] = useState<any[]>([]);
+  const [ruasDisponiveis, setRuasDisponiveis] = useState<any[]>([]);
+  const [vagasDaRuaSelecionada, setVagasDaRuaSelecionada] = useState<any[]>([]);
+  const [ruaSelecionada, setRuaSelecionada] = useState<string>('');
 
   const navigation = useNavigation();
   const route = useRoute<any>();
@@ -35,11 +39,34 @@ export default function CadastroResvaga() {
         setHoraSelecionada(dt);
       }
     }
+    buscarRuasDisponiveis();
   }, [route.params]);
+
+  const buscarRuasDisponiveis = async () => {
+    try {
+      const snapshot = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").where("status", "==", "livre").get();
+      const ruasSet = new Set<string>();
+      snapshot.docs.forEach(doc => ruasSet.add(doc.data().rua));
+      const ruas = Array.from(ruasSet).map(rua => ({ label: rua, value: rua }));
+      setRuasDisponiveis(ruas);
+    } catch (e) {
+      console.error("Erro ao buscar ruas disponíveis:", e);
+    }
+  };
+
+  const buscarVagasDaRua = async (rua: string) => {
+    try {
+      const snapshot = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").where("rua", "==", rua).where("status", "==", "livre").get();
+      const vagas = snapshot.docs.map(doc => ({ id: doc.id, vaga: doc.data().vaga }));
+      setVagasDaRuaSelecionada(vagas);
+    } catch (e) {
+      console.error("Erro ao buscar vagas da rua:", e);
+    }
+  };
 
   const salvar = async () => {
     // validação básica: todos os campos devem estar preenchidos
-    if (!formResvaga.tipo || !formResvaga.vaga || !formResvaga.data || !formResvaga.hora) {
+    if (!formResvaga.tipo || !formResvaga.idVaga || !formResvaga.data || !formResvaga.hora) {
       alert('Por favor, preencha todos os campos antes de salvar.');
       return;
     }
@@ -60,11 +87,18 @@ export default function CadastroResvaga() {
         const idResvaga = refResvaga.doc();
         novoResvaga.id = idResvaga.id;
         await idResvaga.set(novoResvaga.toFirestore());
+
+        // Atualizar status da vaga para ocupada
+        await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(formResvaga.idVaga).update({ status: "ocupada" });
+
         alert('Reserva feita com sucesso!');
       }
 
       setFormResvaga({});
       setDataSelecionada(undefined);
+      setRuaSelecionada('');
+      setVagasDaRuaSelecionada([]);
+      buscarRuasDisponiveis();
     } catch (e) {
       console.error("Erro ao salvar reserva:", e);
       alert("Erro ao salvar reserva!");
@@ -115,16 +149,37 @@ export default function CadastroResvaga() {
             <Picker.Item label="Idoso" value="idoso" />
           </Picker>
 
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Tipo de Veículo</Text>
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Selecionar Rua</Text>
           <Picker
-            selectedValue={formResvaga.vaga}
-            onValueChange={valor => setFormResvaga({ ...formResvaga, vaga: valor })}
+            selectedValue={ruaSelecionada}
+            onValueChange={valor => {
+              setRuaSelecionada(valor);
+              setFormResvaga({ ...formResvaga, idVaga: '' });
+              if (valor) {
+                buscarVagasDaRua(valor);
+              } else {
+                setVagasDaRuaSelecionada([]);
+              }
+            }}
             style={{ backgroundColor: '#fff', marginTop: 5 }}
           >
             <Picker.Item label="Selecione..." value="" />
-            <Picker.Item label="Carro" value="carro" />
-            <Picker.Item label="Moto" value="moto" />
-            <Picker.Item label="Van" value="van" />
+            {ruasDisponiveis.map(rua => (
+              <Picker.Item key={rua.value} label={rua.label} value={rua.value} />
+            ))}
+          </Picker>
+
+          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Selecionar Vaga</Text>
+          <Picker
+            selectedValue={formResvaga.idVaga}
+            onValueChange={valor => setFormResvaga({ ...formResvaga, idVaga: valor })}
+            style={{ backgroundColor: '#fff', marginTop: 5 }}
+            enabled={ruaSelecionada !== ''}
+          >
+            <Picker.Item label="Selecione..." value="" />
+            {vagasDaRuaSelecionada.map(vaga => (
+              <Picker.Item key={vaga.id} label={`Vaga ${vaga.vaga}`} value={vaga.id} />
+            ))}
           </Picker>
 
           <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Data da Reserva</Text>
@@ -177,10 +232,10 @@ export default function CadastroResvaga() {
           <TouchableOpacity
             style={[
               styles.button,
-              !(formResvaga.tipo && formResvaga.vaga && formResvaga.data && formResvaga.hora) && { backgroundColor: '#aaa' },
+              !(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora) && { backgroundColor: '#aaa' },
             ]}
             onPress={salvar}
-            disabled={!(formResvaga.tipo && formResvaga.vaga && formResvaga.data && formResvaga.hora)}
+            disabled={!(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora)}
           >
             <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>

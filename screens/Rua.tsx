@@ -26,23 +26,32 @@ export default function CadastroRua() {
         .doc(auth.currentUser?.uid)
         .collection("Rua")
 
-    const novoRua = new Rua(formRua);
-
-
     if (formRua.id) {
+      // Editar uma vaga específica
       const idRua  = refRua.doc(formRua.id);
-
-      idRua.update(novoRua.toFirestore())
+      idRua.update(new Rua(formRua).toFirestore())
       .then( () => {
-        alert('Cadastro atualizado!');
+        alert('Vaga atualizada!');
         limpar();
       })
     } else {
-      const idRua  = refRua.doc();
-      novoRua.id = idRua.id;
-      idRua.set(novoRua.toFirestore())
-
-      alert('Ocupação de vaga adicionado com sucesso!')    
+      // Cadastrar múltiplas vagas
+      const quantidade = parseInt(formRua.vaga);
+      if (!quantidade || quantidade <= 0) {
+        alert('Quantidade de vagas deve ser um número maior que 0');
+        return;
+      }
+      for (let i = 1; i <= quantidade; i++) {
+        const novaVaga = new Rua({
+          rua: formRua.rua,
+          vaga: i.toString(),
+          status: 'livre'
+        });
+        const idRua = refRua.doc();
+        novaVaga.id = idRua.id;
+        idRua.set(novaVaga.toFirestore());
+      }
+      alert('Vagas cadastradas com sucesso!');
       limpar();
     }
   }
@@ -68,7 +77,7 @@ export default function CadastroRua() {
             value={formRua.rua}
           />
            <TextInput 
-            label='N° da Vaga' 
+            label='Quantidade de Vagas' 
             onChangeText={valor => setFormRua({
               ...formRua,
               vaga : valor
@@ -76,17 +85,8 @@ export default function CadastroRua() {
             style={styles.input}
             activeUnderlineColor='#e9ce33ff'
             value={formRua.vaga}
+            keyboardType='numeric'
           />
-           <Picker
-            selectedValue={formRua.status}
-            onValueChange={valor => setFormRua({ ...formRua, status: valor })}
-            style={{ backgroundColor: '#fff', marginTop: 5 }}
-          >
-            <Picker.Item label="Selecione..." value="" />
-            <Picker.Item label="Ocupada" value="ocupada" />
-            <Picker.Item label="Livre" value="livre" />
-
-          </Picker>
 
         </View>
 

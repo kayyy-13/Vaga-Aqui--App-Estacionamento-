@@ -16,6 +16,7 @@ import { Usuario } from '../model/Usuario';
 
 export default function ListarResvaga() {
     const [resvagas, setResvagas] = useState<Resvaga[]>([]);  //Array das Reservas em branco
+    const [detalhesVagas, setDetalhesVagas] = useState<{[key: string]: {rua: string, vaga: string}}>({});
 
     const refResvaga = firestore.collection("Usuario")
         .doc(auth.currentUser?.uid)
@@ -27,7 +28,7 @@ export default function ListarResvaga() {
 
     const listar = () => {
         const subscriber = refResvaga
-        .onSnapshot( (query) => { 
+        .onSnapshot( async (query) => { 
             const reserva = [];
             query.forEach((documento) => {
                 reserva.push({
@@ -36,6 +37,17 @@ export default function ListarResvaga() {
                 });
             });
             setResvagas(reserva);
+
+            // Buscar detalhes das vagas
+            const ids = reserva.map(r => r.idVaga).filter(id => id);
+            const detalhes: {[key: string]: {rua: string, vaga: string}} = {};
+            for (const id of ids) {
+                const doc = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(id).get();
+                if (doc.exists) {
+                    detalhes[id] = { rua: doc.data()?.rua || '', vaga: doc.data()?.vaga || '' };
+                }
+            }
+            setDetalhesVagas(detalhes);
         })
         return () => subscriber();
     }
@@ -51,7 +63,7 @@ export default function ListarResvaga() {
                         <TouchableOpacity>
                             <Text style={styles.listText}>Data: {item.data}</Text>
                             <Text style={styles.listText}>Tipo: {item.tipo}</Text>
-                            <Text style={styles.listText}>Vaga: {item.vaga}</Text>
+                            <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
                         </TouchableOpacity> }
                     customIcon={() => <FontAwesome6 
                                         name='chevron-down' 

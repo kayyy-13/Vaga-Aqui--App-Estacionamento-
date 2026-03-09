@@ -13,6 +13,7 @@ import { Resvaga } from '../model/Resvaga';
 export default function ListarResvaga() {
     const [reserva, setReserva] = useState<Resvaga[]>([]); //array de vagas
     const [tipoUsuario, setTipoUsuario] = useState<string>(''); //tipo do usuário autenticado
+    const [detalhesVagas, setDetalhesVagas] = useState<{[key: string]: {rua: string, vaga: string}}>({});
     const navigation = useNavigation();
 
     const refResvaga = firestore.collection("Usuario")
@@ -39,7 +40,7 @@ export default function ListarResvaga() {
 
     const listar = () => {
         const subscriber = refResvaga
-        .onSnapshot( (query) => { 
+        .onSnapshot( async (query) => { 
             const reserva = [];
             query.forEach((documento) => {
                 reserva.push({
@@ -48,6 +49,17 @@ export default function ListarResvaga() {
                 });
             });
             setReserva(reserva);
+
+            // Buscar detalhes das vagas
+            const ids = reserva.map(r => r.idVaga).filter(id => id);
+            const detalhes: {[key: string]: {rua: string, vaga: string}} = {};
+            for (const id of ids) {
+                const doc = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(id).get();
+                if (doc.exists) {
+                    detalhes[id] = { rua: doc.data()?.rua || '', vaga: doc.data()?.vaga || '' };
+                }
+            }
+            setDetalhesVagas(detalhes);
         })
         return () => subscriber();
     }
@@ -63,13 +75,16 @@ export default function ListarResvaga() {
     }
 
     const cancelar = async(item) => {
-        const resultado = await refResvaga
-         .doc(item.id)
-         .delete()
-         .then( () => {
-            alert('Vaga cancelada com sucesso!')
-            listar()
-         })
+        try {
+            await refResvaga.doc(item.id).delete();
+            // Liberar a vaga
+            await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(item.idVaga).update({ status: "livre" });
+            alert('Reserva cancelada com sucesso!');
+            listar();
+        } catch (e) {
+            console.error("Erro ao cancelar reserva:", e);
+            alert("Erro ao cancelar reserva!");
+        }
     }
 
     const editar = 
@@ -87,7 +102,7 @@ export default function ListarResvaga() {
                         <Text style={styles.listText}>Data: {item.data}</Text>
                         <Text style={styles.listText}>Hora: {item.hora}</Text>
                         <Text style={styles.listText}>Tipo: {item.tipo}</Text>
-                        <Text style={styles.listText}>Vaga: {item.vaga}</Text>
+                        <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
                         
                         <View style={{flexDirection: 'row', marginTop: 10, gap: 10}}>
                             {tipoUsuario === '2' && (

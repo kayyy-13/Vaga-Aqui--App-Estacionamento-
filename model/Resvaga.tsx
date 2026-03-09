@@ -1,7 +1,7 @@
 export class Resvaga {
     public id:   string;
     public tipo: string;
-    public vaga: string;
+    public idVaga: string;
     public data: string;
     public hora: string;
 
@@ -9,7 +9,7 @@ export class Resvaga {
         if (obj) {
             this.id   = obj.id || '';
             this.tipo = obj.tipo || '';
-            this.vaga = obj.vaga || '';
+            this.idVaga = obj.idVaga || '';
             this.data = obj.data || '';
             this.hora = obj.hora || '';
         }
@@ -19,7 +19,7 @@ export class Resvaga {
         const objeto = `{
             "id"   :   "${this.id}",
             "tipo" :   "${this.tipo}",
-            "vaga" :   "${this.vaga}",
+            "idVaga" :   "${this.idVaga}",
             "data" :   "${this.data}",
             "hora" :   "${this.hora}",
         }`;
@@ -30,7 +30,7 @@ export class Resvaga {
         const Resvaga = {
             id   : this.id,
             tipo : this.tipo,
-            vaga : this.vaga,
+            idVaga : this.idVaga,
             data : this.data,
             hora : this.hora,
         };
