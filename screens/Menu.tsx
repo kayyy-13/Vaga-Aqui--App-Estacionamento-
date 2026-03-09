@@ -45,7 +45,7 @@ export default function Menu() {
                 <>
                     <Drawer.Screen name='Cadastro de Ocupação de Vagas' component={Rua} />
                     <Drawer.Screen name='Lista de Reservas' component={ReservaListar} />
-                    <Drawer.Screen name='Lista de Reservas2' component={ReservaListar2} />
+                    
                 </>
             )}
 

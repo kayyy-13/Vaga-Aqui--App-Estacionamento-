@@ -32,7 +32,6 @@ export default function CadastroResvaga() {
         setDataSelecionada(data);
       }
       if (route.params.resvaga?.hora) {
-        // create a date with today and set time
         const [h, m] = route.params.resvaga.hora.split(':').map(Number);
         const dt = new Date();
         dt.setHours(h, m, 0, 0);
@@ -44,7 +43,7 @@ export default function CadastroResvaga() {
 
   const buscarRuasDisponiveis = async () => {
     try {
-      const snapshot = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").where("status", "==", "livre").get();
+      const snapshot = await firestore.collection("Ruas").where("status", "==", "livre").get();
       const ruasSet = new Set<string>();
       snapshot.docs.forEach(doc => ruasSet.add(doc.data().rua));
       const ruas = Array.from(ruasSet).map(rua => ({ label: rua, value: rua }));
@@ -56,7 +55,7 @@ export default function CadastroResvaga() {
 
   const buscarVagasDaRua = async (rua: string) => {
     try {
-      const snapshot = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").where("rua", "==", rua).where("status", "==", "livre").get();
+      const snapshot = await firestore.collection("Ruas").where("rua", "==", rua).where("status", "==", "livre").get();
       const vagas = snapshot.docs.map(doc => ({ id: doc.id, vaga: doc.data().vaga }));
       setVagasDaRuaSelecionada(vagas);
     } catch (e) {
@@ -89,7 +88,7 @@ export default function CadastroResvaga() {
         await idResvaga.set(novoResvaga.toFirestore());
 
         // Atualizar status da vaga para ocupada
-        await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(formResvaga.idVaga).update({ status: "ocupada" });
+        await firestore.collection("Ruas").doc(formResvaga.idVaga).update({ status: "ocupada" });
 
         alert('Reserva feita com sucesso!');
       }

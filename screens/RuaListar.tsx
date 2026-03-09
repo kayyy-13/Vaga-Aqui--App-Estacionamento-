@@ -12,16 +12,35 @@ import { Rua } from '../model/Rua';
 
 export default function ListarRua() {
     const [ruas, setRuas] = useState<Rua[]>([]);  //Array das Ruas em branco
+    const [tipoUsuario, setTipoUsuario] = useState<string>('');
 
     const navigation = useNavigation();
 
-    const refRua = firestore.collection("Usuario")
-        .doc(auth.currentUser?.uid)
-        .collection("Rua")
+    const refRua = firestore.collection("Ruas")
 
     useEffect( () => {
-        listar();
+        buscarTipoUsuario();
     })
+
+    const buscarTipoUsuario = async () => {
+        try {
+            const docSnap = await firestore.collection("Usuario")
+                .doc(auth.currentUser?.uid)
+                .get();
+            if (docSnap.exists) {
+                const tipo = docSnap.data()?.tipo;
+                setTipoUsuario(tipo);
+                if (tipo === '2') {
+                    listar();
+                } else {
+                    alert('Apenas administradores podem visualizar ruas.');
+                    navigation.goBack();
+                }
+            }
+        } catch (e) {
+            console.error("Erro ao buscar tipo de usuário:", e);
+        }
+    };
 
     const listar = () => {
         const subscriber = refRua

@@ -54,7 +54,7 @@ export default function ListarResvaga() {
             const ids = reserva.map(r => r.idVaga).filter(id => id);
             const detalhes: {[key: string]: {rua: string, vaga: string}} = {};
             for (const id of ids) {
-                const doc = await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(id).get();
+                const doc = await firestore.collection("Ruas").doc(id).get();
                 if (doc.exists) {
                     detalhes[id] = { rua: doc.data()?.rua || '', vaga: doc.data()?.vaga || '' };
                 }
@@ -78,7 +78,7 @@ export default function ListarResvaga() {
         try {
             await refResvaga.doc(item.id).delete();
             // Liberar a vaga
-            await firestore.collection("Usuario").doc(auth.currentUser?.uid).collection("Rua").doc(item.idVaga).update({ status: "livre" });
+            await firestore.collection("Ruas").doc(item.idVaga).update({ status: "livre" });
             alert('Reserva cancelada com sucesso!');
             listar();
         } catch (e) {

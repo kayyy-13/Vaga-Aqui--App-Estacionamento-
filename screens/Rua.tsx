@@ -12,19 +12,38 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function CadastroRua() {
   const[formRua, setFormRua] = useState<Partial<Rua>>({})
+  const [tipoUsuario, setTipoUsuario] = useState<string>('');
 
   const route = useRoute();         // Cria a rota para receber o raca no editar
+  const navigation = useNavigation();
 
   useEffect( () => {                // Recebe o objeto tipo para editar
     if (route.params) {
       setFormRua(route.params.rua); // Preenche o form com rua para edição
-    }    
+    }
+    buscarTipoUsuario();
   }, [route.params])
 
-  const salvar = () => {
-    const refRua = firestore.collection("Usuario")
+  const buscarTipoUsuario = async () => {
+    try {
+      const docSnap = await firestore.collection("Usuario")
         .doc(auth.currentUser?.uid)
-        .collection("Rua")
+        .get();
+      if (docSnap.exists) {
+        const tipo = docSnap.data()?.tipo;
+        setTipoUsuario(tipo);
+        if (tipo !== '2') {
+          alert('Apenas administradores podem cadastrar ruas.');
+          navigation.goBack();
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao buscar tipo de usuário:", e);
+    }
+  };
+
+  const salvar = () => {
+    const refRua = firestore.collection("Ruas")
 
     if (formRua.id) {
       // Editar uma vaga específica
