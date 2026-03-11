@@ -36,6 +36,7 @@ export default function Menu() {
     }        
 
     return(
+         
         <Drawer.Navigator initialRouteName="Página Inicial">
             <Drawer.Screen name='Página Inicial' component={Home} />            
             <Drawer.Screen name='Cadastro de Reserva' component={Reserva} />
@@ -43,7 +44,7 @@ export default function Menu() {
 
             {usuario.tipo === '2' && (
                 <>
-                    <Drawer.Screen name='Cadastro de Ocupação de Vagas' component={Rua} />
+                    <Drawer.Screen name='Cadastro de Ruas' component={Rua} />
                     <Drawer.Screen name='Lista de Reservas' component={ReservaListar} />
                     
                 </>
