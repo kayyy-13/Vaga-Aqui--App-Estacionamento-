@@ -5,25 +5,25 @@ import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../estilo';
 
-export default function Login() {
+export default function AdminLogin() {
   const[email, setEmail] = useState('')
   const[senha, setSenha] = useState('')
 
   const navigation = useNavigation()
 
-  const logar = async () => {
+  const logarAdmin = async () => {
     try {
       const userCredentials = await auth.signInWithEmailAndPassword(email, senha);
       console.log("Logado como: " + userCredentials.user?.email);
 
-      // Verificar se o usuário é normal
+      // Verificar se o usuário é admin
       const userDoc = await firestore.collection("Usuario").doc(userCredentials.user?.uid).get();
       const userData = userDoc.data();
 
-      if (userData?.tipo === '1') {
+      if (userData?.tipo === '2') {
         navigation.replace('Menu');
       } else {
-        alert('Esta é a tela de login para usuários normais. Use a tela de administrador se aplicável.');
+        alert('Você não tem permissão para acessar como administrador.');
         await auth.signOut();
       }
     } catch (erro) {
@@ -34,7 +34,7 @@ export default function Login() {
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <ImageBackground source={require('../assets/login.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>TELA DE LOGIN</Text>
+        <Text style={styles.titulo}>LOGIN DE ADMINISTRADOR</Text>
 
         <View style={styles.inputView}>
           <TextInput
@@ -51,23 +51,19 @@ export default function Login() {
             style={styles.input}
             activeUnderlineColor='#e9ce33ff'
           />
-        </View>      
+        </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.button} onPress={logar}>
-            <Text style={styles.buttonText}>Login</Text>
+          <TouchableOpacity style={styles.button} onPress={logarAdmin}>
+            <Text style={styles.buttonText}>Login como Admin</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonOutline]} onPress={() => navigation.replace('AdminLogin')}>
-            <Text style={[styles.buttonText, styles.buttonOutlineText]}>Login como Administrador</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={() => navigation.replace('Register')}>
-            <Text style={[styles.buttonText, styles.buttonSecText]}>Registrar</Text>
+          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={() => navigation.replace('Login')}>
+            <Text style={[styles.buttonText, styles.buttonSecText]}>Voltar</Text>
           </TouchableOpacity>
         </View>
 
-      </ImageBackground>      
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }

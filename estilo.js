@@ -1,4 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const colors = {
   primary: '#e9ce33',
@@ -24,14 +26,14 @@ export default StyleSheet.create({
     backgroundColor: colors.bg,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.max(16, Math.min(width * 0.05, 24)), // Mínimo 16, máximo 24
     fontWeight: 'bold',
     color: colors.primary,
-    marginTop: 140,
-    marginBottom: 40,
+    marginTop: Math.max(50, height * 0.15), // Mínimo 50
+    marginBottom: Math.max(20, height * 0.05),
   },
   inputView: {
-    width: '55%',
+    width: '85%', // Aumentado para melhor adaptação
     marginBottom: 20,
   },
   input: {
@@ -44,42 +46,50 @@ export default StyleSheet.create({
     paddingLeft: 8,
   },
   textPicker: {
-    fontSize: 16,
+    fontSize: Math.max(14, Math.min(width * 0.04, 18)),
   },
   buttonView: {
-    width: '55%',
+    width: '85%', // Aumentado
   },
   button: {
     backgroundColor: colors.primary,
     width: '100%',
-    padding: 15,
+    padding: Math.max(20, height * 0.025), // Aumentado mínimo para 20
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50, // Altura mínima para garantir visibilidade
   },
   buttonText: {
-    color: colors.white,
+    color: '#000', // Mudado para preto para melhor contraste
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
+    textAlign: 'center',
   },
   buttonSecondary: {
     backgroundColor: colors.white,
     borderColor: colors.primary,
     borderWidth: 2,
   },
-  buttonSecondaryText: {
+  buttonOutline: {
+    backgroundColor: colors.white,
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  buttonOutlineText: {
     color: colors.primary,
   },
   listItem: {
     backgroundColor: colors.lightGray,
     borderBottomWidth: StyleSheet.hairlineWidth * 2,
     borderBottomColor: colors.primary,
-    padding: 10,
-    marginTop: 15,
-    width: 300,
+    padding: Math.max(8, width * 0.025), // Mínimo 8
+    marginTop: Math.max(10, height * 0.02),
+    width: width * 0.85, // Largura baseada na tela
     borderRadius: 10,
   },
   listText: {
-    fontSize: 18,
+    fontSize: Math.max(14, Math.min(width * 0.045, 20)),
   },
 });

@@ -19,6 +19,7 @@ export default function CadastroResvaga() {
   const [ruasDisponiveis, setRuasDisponiveis] = useState<any[]>([]);
   const [vagasDaRuaSelecionada, setVagasDaRuaSelecionada] = useState<any[]>([]);
   const [ruaSelecionada, setRuaSelecionada] = useState<string>('');
+  const [idVagaAntiga, setIdVagaAntiga] = useState<string>('');
 
   const navigation = useNavigation();
   const route = useRoute<any>();
@@ -26,6 +27,7 @@ export default function CadastroResvaga() {
   useEffect(() => {
     if (route.params) {
       setFormResvaga(route.params.resvaga);
+      setIdVagaAntiga(route.params.resvaga.idVaga || '');
       if (route.params.resvaga?.data) {
         const partes = route.params.resvaga.data.split('/');
         const data = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
@@ -46,6 +48,15 @@ export default function CadastroResvaga() {
       const snapshot = await firestore.collection("Ruas").where("status", "==", "livre").get();
       const ruasSet = new Set<string>();
       snapshot.docs.forEach(doc => ruasSet.add(doc.data().rua));
+
+      // Se é edição, incluir a rua da vaga antiga
+      if (idVagaAntiga) {
+        const docAntiga = await firestore.collection("Ruas").doc(idVagaAntiga).get();
+        if (docAntiga.exists) {
+          ruasSet.add(docAntiga.data()?.rua);
+        }
+      }
+
       const ruas = Array.from(ruasSet).map(rua => ({ label: rua, value: rua }));
       setRuasDisponiveis(ruas);
     } catch (e) {
@@ -56,7 +67,16 @@ export default function CadastroResvaga() {
   const buscarVagasDaRua = async (rua: string) => {
     try {
       const snapshot = await firestore.collection("Ruas").where("rua", "==", rua).where("status", "==", "livre").get();
-      const vagas = snapshot.docs.map(doc => ({ id: doc.id, vaga: doc.data().vaga }));
+      let vagas = snapshot.docs.map(doc => ({ id: doc.id, vaga: doc.data().vaga }));
+
+      // Se é edição e a vaga antiga está nesta rua, incluir ela mesmo se ocupada
+      if (idVagaAntiga) {
+        const docAntiga = await firestore.collection("Ruas").doc(idVagaAntiga).get();
+        if (docAntiga.exists && docAntiga.data()?.rua === rua && !vagas.find(v => v.id === idVagaAntiga)) {
+          vagas.push({ id: idVagaAntiga, vaga: docAntiga.data()?.vaga });
+        }
+      }
+
       setVagasDaRuaSelecionada(vagas);
     } catch (e) {
       console.error("Erro ao buscar vagas da rua:", e);
@@ -81,6 +101,13 @@ export default function CadastroResvaga() {
       if (formResvaga.id) {
         const idResvaga = refResvaga.doc(formResvaga.id);
         await idResvaga.update(novoResvaga.toFirestore());
+
+        // Se a vaga mudou, liberar a antiga e ocupar a nova
+        if (idVagaAntiga && idVagaAntiga !== formResvaga.idVaga) {
+          await firestore.collection("Ruas").doc(idVagaAntiga).update({ status: "livre" });
+          await firestore.collection("Ruas").doc(formResvaga.idVaga).update({ status: "ocupada" });
+        }
+
         alert('Reserva atualizada com sucesso!');
       } else {
         const idResvaga = refResvaga.doc();
@@ -97,6 +124,7 @@ export default function CadastroResvaga() {
       setDataSelecionada(undefined);
       setRuaSelecionada('');
       setVagasDaRuaSelecionada([]);
+      setIdVagaAntiga('');
       buscarRuasDisponiveis();
     } catch (e) {
       console.error("Erro ao salvar reserva:", e);

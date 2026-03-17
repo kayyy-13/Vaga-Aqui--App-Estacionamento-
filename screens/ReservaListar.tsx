@@ -122,14 +122,22 @@ export default function ListarResvaga() {
                                 </>
                             )}
                             {tipoUsuario === '1' && (
-                                <TouchableOpacity 
+                               <>
+                             <TouchableOpacity 
+                                        style={[styles.button, {flex: 1}]}
+                                        onPress={() => editar(item)}
+                                    >
+                                        <Text style={styles.buttonText}>Editar</Text>
+                                    </TouchableOpacity>
+                               <TouchableOpacity 
                                     style={[styles.button, {flex: 1}]}
                                     onPress={() => cancelar(item)}
                                 >
                                     <Text style={styles.buttonText}>Cancelar</Text>
                                 </TouchableOpacity>
+                                </>
                             )}
-                        </View>
+                        </View>                                                     
                     </View>
                 )}
             />
