@@ -1,55 +1,98 @@
 import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import Home         from "./Home";
 import Rua         from "./Rua";
-import RuaListar   from "./RuaListar";
 import Reserva          from "./Resvaga";
 import ReservaListar    from "./ReservaListar";
-import ReservaListar2   from "./ReservaListar2";
+import Profile from './Profile';
+import Admin from './Admin';
+
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons as Icon } from '@expo/vector-icons';
 
 import { Usuario } from "../model/Usuario";
 import { auth, firestore } from "../firebase";
 import { useEffect, useState } from "react";
 
-const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function Menu() {
-    const[usuario, setUsuario] = useState<Usuario[]>([]); 
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    useEffect( () => {                // Recebe o objeto reserva para editar
+    useEffect(() => {
         listarUsuario();
-    }, [])
+    }, []);
 
     const listarUsuario = () => {
-        const refUsuario = firestore.collection("Usuario")
+        firestore.collection("Usuario")
             .doc(auth.currentUser?.uid)
             .get()
-            .then(DocumentSnapshot =>{
-                setUsuario({
-                    id: DocumentSnapshot.id,
-                    ...DocumentSnapshot.data()
-                })                
-            })
-        
-    }        
+            .then(documentSnapshot => {
+                if (documentSnapshot.exists) {
+                    setUsuario({
+                        id: documentSnapshot.id,
+                        ...documentSnapshot.data()
+                    } as Usuario);
+                }
+            });
+    };
 
-    return(
-         
-        <Drawer.Navigator initialRouteName="Página Inicial">
-            <Drawer.Screen name='Página Inicial' component={Home} />            
-            <Drawer.Screen name='Cadastro de Reserva' component={Reserva} />
-             <Drawer.Screen name='Minhas Reservas' component={ReservaListar} />
+    return (
+        <Tab.Navigator
+            id="main-tabs"
+            screenOptions={{
+                tabBarActiveTintColor: "#1a5c47",
+                tabBarActiveBackgroundColor: "#a5d1c3",
+                tabBarLabelStyle: { fontSize: 13, fontWeight: "900" }
+            }}
+        >
+                <Tab.Screen
+                    name='Página Inicial'
+                    component={Home}
+                    options={{ tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} /> }}
+                />
 
-            {usuario.tipo === '2' && (
-                <>
-                    <Drawer.Screen name='Cadastro de Ruas' component={Rua} />
-                    <Drawer.Screen name='Lista de Reservas' component={ReservaListar} />
-                    
-                </>
-            )}
+                <Tab.Screen
+                    name='Cadastro de Reserva'
+                    component={Reserva}
+                    options={{ tabBarIcon: ({ color, size }) => <Icon name="car" size={size} color={color} /> }}
+                />
 
-        </Drawer.Navigator>
-    )
+                <Tab.Screen
+                    name='Minhas Reservas'
+                    component={ReservaListar}
+                    options={{ tabBarIcon: ({ color, size }) => <Icon name="list" size={size} color={color} /> }}
+                />
+
+                <Tab.Screen
+                    name='Perfil'
+                    component={Profile}
+                    options={{ tabBarIcon: ({ color, size }) => <Icon name="person" size={size} color={color} /> }}
+                />
+
+                {usuario?.tipo === '2' && (
+                    <Tab.Screen
+                        name='Admin'
+                        component={Admin}
+                        options={{ tabBarIcon: ({ color, size }) => <Icon name="lock-closed" size={size} color={color} /> }}
+                    />
+                )}
+
+                {usuario?.tipo === '2' && (
+                    <>
+                        <Tab.Screen
+                            name='Cadastro de Ruas'
+                            component={Rua}
+                            options={{ tabBarButton: () => null }}
+                        />
+
+                        <Tab.Screen
+                            name='Lista de Reservas'
+                            component={ReservaListar}
+                            options={{ tabBarButton: () => null }}
+                        />
+                    </>
+                )}
+            </Tab.Navigator>
+    );
 }

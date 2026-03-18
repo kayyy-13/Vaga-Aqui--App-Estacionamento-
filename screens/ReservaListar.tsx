@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, ImageBackground} from 'react-native';
+import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, ImageBackground, Alert} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -75,16 +75,25 @@ export default function ListarResvaga() {
     }
 
     const cancelar = async(item) => {
-        try {
-            await refResvaga.doc(item.id).delete();
-            // Liberar a vaga
-            await firestore.collection("Ruas").doc(item.idVaga).update({ status: "livre" });
-            alert('Reserva cancelada com sucesso!');
-            listar();
-        } catch (e) {
-            console.error("Erro ao cancelar reserva:", e);
-            alert("Erro ao cancelar reserva!");
-        }
+        Alert.alert(
+            "Confirmação",
+            "Você tem certeza disso?",
+            [
+                { text: "Não", style: "cancel" },
+                { text: "Sim", onPress: async () => {
+                    try {
+                        await refResvaga.doc(item.id).delete();
+                        // Liberar a vaga
+                        await firestore.collection("Ruas").doc(item.idVaga).update({ status: "livre" });
+                        alert('Reserva cancelada com sucesso!');
+                        listar();
+                    } catch (e) {
+                        console.error("Erro ao cancelar reserva:", e);
+                        alert("Erro ao cancelar reserva!");
+                    }
+                }}
+            ]
+        );
     }
 
     const editar = 

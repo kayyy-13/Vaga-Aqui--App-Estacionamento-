@@ -4,6 +4,7 @@ export class Resvaga {
     public idVaga: string;
     public data: string;
     public hora: string;
+    public expiraEm: number;
 
     constructor(obj?: Partial<Resvaga>) {
         if (obj) {
@@ -12,6 +13,14 @@ export class Resvaga {
             this.idVaga = obj.idVaga || '';
             this.data = obj.data || '';
             this.hora = obj.hora || '';
+            this.expiraEm = obj.expiraEm || 0;
+        } else {
+            this.id = '';
+            this.tipo = '';
+            this.idVaga = '';
+            this.data = '';
+            this.hora = '';
+            this.expiraEm = 0;
         }
     }
 
@@ -22,6 +31,7 @@ export class Resvaga {
             "idVaga" :   "${this.idVaga}",
             "data" :   "${this.data}",
             "hora" :   "${this.hora}",
+            "expiraEm" :   "${this.expiraEm}",
         }`;
         return objeto;
     }
@@ -33,6 +43,7 @@ export class Resvaga {
             idVaga : this.idVaga,
             data : this.data,
             hora : this.hora,
+            expiraEm : this.expiraEm,
         };
         return Resvaga;
     }

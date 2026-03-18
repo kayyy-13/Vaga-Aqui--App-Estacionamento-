@@ -32,6 +32,16 @@ export default StyleSheet.create({
     marginTop: Math.max(50, height * 0.15), // Mínimo 50
     marginBottom: Math.max(20, height * 0.05),
   },
+  label: {
+    color: colors.primary,
+    fontWeight: 'bold',
+    marginTop: 12,
+  },
+  text: {
+    fontSize: 16,
+    color: '#000',
+    marginBottom: 10,
+  },
   inputView: {
     width: '85%', // Aumentado para melhor adaptação
     marginBottom: 20,
