@@ -8,6 +8,7 @@ import styles from '../estilo';
 import { Picker } from '@react-native-picker/picker';
 
 import { Resvaga } from '../model/Resvaga';
+import { Ionicons as Icon } from '@expo/vector-icons';
 
 
 export default function ListarResvaga() {
@@ -104,6 +105,12 @@ export default function ListarResvaga() {
 
     return (
         <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+            <View style={{flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10, paddingTop: 10}}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon name="arrow-back" size={24} color="#1a5c47" />
+                    <Text style={{color: '#1a5c47', marginLeft: 5}}>Voltar</Text>
+                </TouchableOpacity>
+            </View>
             <FlatList
                 data={reserva}
                 renderItem={ ({item}) => (

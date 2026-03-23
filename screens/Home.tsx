@@ -39,18 +39,14 @@ export default function Home() {
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>Bem vindo!</Text>
+        <Text style={styles.titulo}>Bem-vindo!</Text>
 
         {usuario.tipo === '2' && (
           
           <Text style={styles.titulo}>Você é um usuário administrador</Text>
         )}
 
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.button} onPress={logout}>
-            <Text style={styles.buttonText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
+      
 
       </ImageBackground>
     </KeyboardAvoidingView>

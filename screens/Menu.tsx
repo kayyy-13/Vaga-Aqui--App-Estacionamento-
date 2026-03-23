@@ -4,6 +4,7 @@ import Home         from "./Home";
 import Rua         from "./Rua";
 import Reserva          from "./Resvaga";
 import ReservaListar    from "./ReservaListar";
+import ReservaListar2   from "./ReservaListar2";
 import Profile from './Profile';
 import Admin from './Admin';
 
@@ -52,17 +53,21 @@ export default function Menu() {
                     options={{ tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} /> }}
                 />
 
-                <Tab.Screen
-                    name='Cadastro de Reserva'
-                    component={Reserva}
-                    options={{ tabBarIcon: ({ color, size }) => <Icon name="car" size={size} color={color} /> }}
-                />
+                {usuario?.tipo !== '2' && (
+                    <>
+                        <Tab.Screen
+                            name='Cadastro de Reserva'
+                            component={Reserva}
+                            options={{ tabBarIcon: ({ color, size }) => <Icon name="car" size={size} color={color} /> }}
+                        />
 
-                <Tab.Screen
-                    name='Minhas Reservas'
-                    component={ReservaListar}
-                    options={{ tabBarIcon: ({ color, size }) => <Icon name="list" size={size} color={color} /> }}
-                />
+                        <Tab.Screen
+                            name='Minhas Reservas'
+                            component={ReservaListar}
+                            options={{ tabBarIcon: ({ color, size }) => <Icon name="list" size={size} color={color} /> }}
+                        />
+                    </>
+                )}
 
                 <Tab.Screen
                     name='Perfil'
@@ -79,16 +84,18 @@ export default function Menu() {
                 )}
 
                 {usuario?.tipo === '2' && (
+                    <Tab.Screen
+                        name='Reservas do App'
+                        component={ReservaListar2}
+                        options={{ tabBarButton: () => null }}
+                    />
+                )}
+
+                {usuario?.tipo === '2' && (
                     <>
                         <Tab.Screen
                             name='Cadastro de Ruas'
                             component={Rua}
-                            options={{ tabBarButton: () => null }}
-                        />
-
-                        <Tab.Screen
-                            name='Lista de Reservas'
-                            component={ReservaListar}
                             options={{ tabBarButton: () => null }}
                         />
                     </>

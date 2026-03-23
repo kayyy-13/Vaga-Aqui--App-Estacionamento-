@@ -33,7 +33,7 @@ export default function Login() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/login.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/back.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>TELA DE LOGIN</Text>
 
         <View style={styles.inputView}>

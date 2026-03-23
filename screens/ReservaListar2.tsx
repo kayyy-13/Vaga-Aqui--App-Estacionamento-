@@ -1,79 +1,191 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, ImageBackground, Platform, UIManager} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { auth, firestore } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
+import { Alert, FlatList, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import { firestore } from '../firebase';
 import styles from '../estilo';
 
-import { Picker } from '@react-native-picker/picker';
+type ReservaAdmin = {
+    id: string;
+    idUsuario: string;
+    nomeUsuario: string;
+    idVaga: string;
+    data: string;
+    hora: string;
+    dia: string;
+};
 
-import { Resvaga } from '../model/Resvaga';
+export default function ReservaListar2() {
+    const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
+    const [carregando, setCarregando] = useState(true);
+    const [detalhesVagas, setDetalhesVagas] = useState<{ [key: string]: { rua: string; vaga: string } }>({});
 
-import { AccordionItem } from 'react-native-accordion-list-view';
-import { FontAwesome6 } from '@react-native-vector-icons/fontawesome6';
-import { Usuario } from '../model/Usuario';
+    useEffect(() => {
+        listarReservas();
+    }, []);
 
+    const obterDiaSemana = (data?: string) => {
+        if (!data) {
+            return '';
+        }
 
-export default function ListarResvaga() {
-    const [resvagas, setResvagas] = useState<Resvaga[]>([]);  //Array das Reservas em branco
-    const [detalhesVagas, setDetalhesVagas] = useState<{[key: string]: {rua: string, vaga: string}}>({});
+        const partes = data.split('/');
+        if (partes.length !== 3) {
+            return '';
+        }
 
-    const refResvaga = firestore.collection("Usuario")
-        .doc(auth.currentUser?.uid)
-        .collection("Resvaga")
+        const [dia, mes, ano] = partes.map(Number);
+        const dataReserva = new Date(ano, mes - 1, dia);
 
-    useEffect( () => {
-        listar();
-    })
+        if (Number.isNaN(dataReserva.getTime())) {
+            return '';
+        }
 
-    const listar = () => {
-        const subscriber = refResvaga
-        .onSnapshot( async (query) => { 
-            const reserva = [];
-            query.forEach((documento) => {
-                reserva.push({
-                    ...documento.data(),
-                    key: documento.id
+        const diasSemana = [
+            'Domingo',
+            'Segunda-feira',
+            'Terça-feira',
+            'Quarta-feira',
+            'Quinta-feira',
+            'Sexta-feira',
+            'Sábado',
+        ];
+
+        return diasSemana[dataReserva.getDay()];
+    };
+
+    const listarReservas = async () => {
+        try {
+            setCarregando(true);
+
+            const usuariosSnapshot = await firestore.collection('Usuario').get();
+            const reservasColetadas: ReservaAdmin[] = [];
+
+            for (const usuarioDoc of usuariosSnapshot.docs) {
+                const dadosUsuario = usuarioDoc.data();
+                const reservasSnapshot = await firestore
+                    .collection('Usuario')
+                    .doc(usuarioDoc.id)
+                    .collection('Resvaga')
+                    .get();
+
+                reservasSnapshot.forEach((reservaDoc) => {
+                    const dadosReserva = reservaDoc.data();
+
+                    reservasColetadas.push({
+                        id: reservaDoc.id,
+                        idUsuario: usuarioDoc.id,
+                        nomeUsuario: dadosUsuario?.nome || 'Usuário sem nome',
+                        idVaga: dadosReserva?.idVaga || '',
+                        data: dadosReserva?.data || '',
+                        hora: dadosReserva?.hora || '',
+                        dia: obterDiaSemana(dadosReserva?.data),
+                    });
                 });
-            });
-            setResvagas(reserva);
+            }
 
-            // Buscar detalhes das vagas
-            const ids = reserva.map(r => r.idVaga).filter(id => id);
-            const detalhes: {[key: string]: {rua: string, vaga: string}} = {};
-            for (const id of ids) {
-                const doc = await firestore.collection("Ruas").doc(id).get();
-                if (doc.exists) {
-                    detalhes[id] = { rua: doc.data()?.rua || '', vaga: doc.data()?.vaga || '' };
+            const idsVagas = [...new Set(reservasColetadas.map((item) => item.idVaga).filter(Boolean))];
+            const detalhes: { [key: string]: { rua: string; vaga: string } } = {};
+
+            for (const idVaga of idsVagas) {
+                const vagaDoc = await firestore.collection('Ruas').doc(idVaga).get();
+
+                if (vagaDoc.exists) {
+                    detalhes[idVaga] = {
+                        rua: vagaDoc.data()?.rua || '',
+                        vaga: vagaDoc.data()?.vaga || '',
+                    };
                 }
             }
+
+            reservasColetadas.sort((a, b) => {
+                const [diaA, mesA, anoA] = (a.data || '').split('/').map(Number);
+                const [diaB, mesB, anoB] = (b.data || '').split('/').map(Number);
+                const dataA = new Date(anoA || 0, (mesA || 1) - 1, diaA || 1).getTime();
+                const dataB = new Date(anoB || 0, (mesB || 1) - 1, diaB || 1).getTime();
+
+                if (dataA !== dataB) {
+                    return dataA - dataB;
+                }
+
+                return (a.hora || '').localeCompare(b.hora || '');
+            });
+
             setDetalhesVagas(detalhes);
-        })
-        return () => subscriber();
-    }
+            setReservas(reservasColetadas);
+        } catch (error) {
+            console.error('Erro ao listar reservas do administrador:', error);
+        } finally {
+            setCarregando(false);
+        }
+    };
+
+    const cancelarReserva = (item: ReservaAdmin) => {
+        Alert.alert(
+            'Confirmação',
+            'Deseja cancelar esta reserva?',
+            [
+                { text: 'Não', style: 'cancel' },
+                {
+                    text: 'Sim',
+                    onPress: async () => {
+                        try {
+                            await firestore
+                                .collection('Usuario')
+                                .doc(item.idUsuario)
+                                .collection('Resvaga')
+                                .doc(item.id)
+                                .delete();
+
+                            if (item.idVaga) {
+                                await firestore.collection('Ruas').doc(item.idVaga).update({ status: 'livre' });
+                            }
+
+                            alert('Reserva cancelada com sucesso!');
+                            listarReservas();
+                        } catch (error) {
+                            console.error('Erro ao cancelar reserva do administrador:', error);
+                            alert('Erro ao cancelar reserva!');
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     return (
-        <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+        <ImageBackground source={require('../assets/tela.png')} resizeMode="stretch" style={styles.container}>
+            <Text style={styles.titulo}>Reservas do App</Text>
 
-            {resvagas.map(item => (
-                <AccordionItem 
-                    key={item.id}
-                    customTitle={() => <Text style={styles.listText}>ID Usuário: {item.id}</Text>}    
-                    customBody={() => 
-                        <TouchableOpacity>
-                            <Text style={styles.listText}>Data: {item.data}</Text>
-                            <Text style={styles.listText}>Tipo: {item.tipo}</Text>
-                            <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
-                        </TouchableOpacity> }
-                    customIcon={() => <FontAwesome6 
-                                        name='chevron-down' 
-                                        size={20} 
-                                        iconStyle='solid' 
-                                        color={'#00474fff'}
-                                      />}
+            {carregando ? (
+                <Text style={styles.listText}>Carregando reservas...</Text>
+            ) : (
+                <FlatList
+                    data={reservas}
+                    keyExtractor={(item) => `${item.idUsuario}-${item.id}`}
+                    contentContainerStyle={{ paddingBottom: 30 }}
+                    ListEmptyComponent={<Text style={styles.listText}>Nenhuma reserva encontrada.</Text>}
+                    renderItem={({ item }) => (
+                        <View style={styles.listItem}>
+                            <Text style={styles.listText}>Usuário: {item.nomeUsuario}</Text>
+                            <Text style={styles.listText}>Dia: {item.dia || 'Não informado'}</Text>
+                            <Text style={styles.listText}>Data: {item.data || 'Não informada'}</Text>
+                            <Text style={styles.listText}>Hora: {item.hora || 'Não informada'}</Text>
+                            <Text style={styles.listText}>
+                                Vaga:{' '}
+                                {detalhesVagas[item.idVaga]
+                                    ? `${detalhesVagas[item.idVaga].rua} - vaga ${detalhesVagas[item.idVaga].vaga}`
+                                    : item.idVaga || 'Não informada'}
+                            </Text>
+
+                            <TouchableOpacity
+                                style={[styles.button, { marginTop: 10, backgroundColor: '#d32f2f' }]}
+                                onPress={() => cancelarReserva(item)}
+                            >
+                                <Text style={styles.buttonText}>Cancelar Reserva</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 />
-            ))}
-            
+            )}
         </ImageBackground>
-    )
+    );
 }

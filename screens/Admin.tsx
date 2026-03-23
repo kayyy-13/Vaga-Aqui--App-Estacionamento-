@@ -20,9 +20,9 @@ export default function Admin() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('Lista de Reservas')}
+          onPress={() => navigation.navigate('Reservas do App')}
         >
-          <Text style={styles.buttonText}>Lista de Reservas</Text>
+          <Text style={styles.buttonText}>Listar Reservas</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -111,9 +111,6 @@ export default function Register() {
         </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.button} onPress={admin}>
-            <Text style={styles.buttonText}>Admin</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={normal}>
             <Text style={styles.buttonText}>Normal</Text>
           </TouchableOpacity>
