@@ -36,7 +36,7 @@ export default function Profile() {
       <View style={styles.container}>
         <Text style={styles.titulo}>Perfil</Text>
 
-        <View style={{ width: '90%', marginTop: 20 }}>
+        <View style={styles.profileFormContainer}>
           <Text style={styles.label}>Nome</Text>
           <Text style={styles.text}>{usuario?.nome || 'Carregando...'}</Text>
 

@@ -152,7 +152,7 @@ export default function ReservaListar2() {
     };
 
     return (
-        <ImageBackground source={require('../assets/tela.png')} resizeMode="stretch" style={styles.container}>
+        <ImageBackground source={require('../assets/fundo.png')} resizeMode="stretch" style={styles.container}>
             <Text style={styles.titulo}>Reservas do App</Text>
 
             {carregando ? (
@@ -161,7 +161,7 @@ export default function ReservaListar2() {
                 <FlatList
                     data={reservas}
                     keyExtractor={(item) => `${item.idUsuario}-${item.id}`}
-                    contentContainerStyle={{ paddingBottom: 30 }}
+                    contentContainerStyle={styles.flatlistContentContainer}
                     ListEmptyComponent={<Text style={styles.listText}>Nenhuma reserva encontrada.</Text>}
                     renderItem={({ item }) => (
                         <View style={styles.listItem}>

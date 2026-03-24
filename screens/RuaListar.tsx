@@ -1,27 +1,48 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, ImageBackground} from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Text, View, FlatList, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../estilo';
 
-import { Picker } from '@react-native-picker/picker';
+import { Rua } from '../model/Rua';
 
-import { Rua } from '../model/Rua'; 
-
-
+/**
+ * Tela para listar ruas disponíveis (apenas para administradores).
+ * Permite visualizar, editar e excluir ruas.
+ */
 export default function ListarRua() {
-    const [ruas, setRuas] = useState<Rua[]>([]);  //Array das Ruas em branco
-    const [tipoUsuario, setTipoUsuario] = useState<string>('');
+    const [ruas, setRuas] = useState<Rua[]>([]); // Estado para armazenar lista de ruas
+    const [tipoUsuario, setTipoUsuario] = useState<string>(''); // Tipo do usuário logado
 
     const navigation = useNavigation();
+    const refRua = firestore.collection("Ruas");
 
-    const refRua = firestore.collection("Ruas")
+    useEffect(() => {
+        if (tipoUsuario && tipoUsuario !== '2') {
+            Alert.alert('Acesso negado', 'Apenas administradores podem visualizar ruas.');
+            navigation.goBack();
+        }
+    }, [tipoUsuario, navigation]);
 
-    useEffect( () => {
-        buscarTipoUsuario();
-    })
+    useEffect(() => {
+        if (tipoUsuario === '2') {
+            const subscriber = refRua.onSnapshot((query) => {
+                const ruas = [];
+                query.forEach((documento) => {
+                    ruas.push({
+                        ...documento.data(),
+                        key: documento.id
+                    });
+                });
+                setRuas(ruas);
+            });
+            return () => subscriber(); // Limpa listener ao desmontar
+        }
+    }, [tipoUsuario]); // Executa quando tipoUsuario muda
 
+    /**
+     * Busca o tipo do usuário logado e define permissões.
+     */
     const buscarTipoUsuario = async () => {
         try {
             const docSnap = await firestore.collection("Usuario")
@@ -30,55 +51,52 @@ export default function ListarRua() {
             if (docSnap.exists) {
                 const tipo = docSnap.data()?.tipo;
                 setTipoUsuario(tipo);
-                if (tipo === '2') {
-                    listar();
-                } else {
-                    alert('Apenas administradores podem visualizar ruas.');
-                    navigation.goBack();
-                }
             }
         } catch (e) {
             console.error("Erro ao buscar tipo de usuário:", e);
         }
     };
 
-    const listar = () => {
-        const subscriber = refRua
-        .onSnapshot( (query) => { 
-            const ruas = [];
-            query.forEach((documento) => {
-                ruas.push({
-                    ...documento.data(),
-                    key: documento.id
-                });
-            });
-            setRuas(ruas);
-        })
-        return () => subscriber();
-    }
+    /**
+     * Exclui uma rua do Firestore com confirmação.
+     */
+    const excluir = async (item: Rua) => {
+        Alert.alert(
+            "Confirmação",
+            "Deseja excluir esta rua?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Excluir",
+                    onPress: async () => {
+                        try {
+                            await refRua.doc(item.id).delete();
+                            Alert.alert('Sucesso', 'Rua excluída com sucesso!');
+                        } catch (e) {
+                            console.error("Erro ao excluir rua:", e);
+                            Alert.alert('Erro', 'Falha ao excluir rua.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
-    const excluir = async(item) => {
-        const resultado = await refRua
-         .doc(item.id)
-         .delete()
-         .then( () => {
-            alert('Excluído com sucesso!')
-            listar()
-         })
-    }
-
+    /**
+     * Navega para a tela de edição da rua selecionada.
+     */
     const editar = (item: Rua) => {
-        navigation.navigate("Cadastro de Ocupação de Vagas", {rua: item});
-    }
+        navigation.navigate("Cadastro de Ocupação de Vagas", { rua: item });
+    };
 
     return (
-        <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+        <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
             <FlatList
                 data={ruas}
-                renderItem={ ({item}) => (
+                renderItem={({ item }) => (
                     <TouchableOpacity style={styles.listItem}
-                        onPress={ () => editar(item) }
-                        onLongPress={ () => excluir(item) }
+                        onPress={() => editar(item)}
+                        onLongPress={() => excluir(item)}
                     >
                         <Text style={styles.listText}>Rua: {item.rua}</Text>
                         <Text style={styles.listText}>N° da Vaga: {item.vaga}</Text>
@@ -87,5 +105,5 @@ export default function ListarRua() {
                 )}
             />
         </ImageBackground>
-    )
+    );
 }

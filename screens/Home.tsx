@@ -1,4 +1,4 @@
-import { Button, ImageBackground, KeyboardAvoidingView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, KeyboardAvoidingView, Text, TouchableOpacity, View } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../estilo';
@@ -6,43 +6,53 @@ import styles from '../estilo';
 import { Usuario } from "../model/Usuario";
 import { useEffect, useState } from "react";
 
+/**
+ * Tela inicial do usuário logado.
+ * Exibe mensagem de boas-vindas e opções baseadas no tipo de usuário.
+ */
 export default function Home() {
-  const[usuario, setUsuario] = useState<Usuario[]>([]); 
+  const [usuario, setUsuario] = useState<Usuario | null>(null); // Estado para armazenar dados do usuário logado
 
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
-  const logout = () =>{
+  /**
+   * Faz logout do usuário e redireciona para a tela de login.
+   */
+  const logout = () => {
     auth
-    .signOut()
-    .then( () => {
-      navigation.replace('Login')
-    })
-  }
+      .signOut()
+      .then(() => {
+        navigation.replace('Login');
+      });
+  };
 
-  useEffect( () => {                // Recebe o objeto resvaga para editar
-      listarUsuario();
-  }, [])
+  useEffect(() => {
+    listarUsuario(); // Carrega dados do usuário ao montar o componente
+  }, []);
 
+  /**
+   * Busca os dados do usuário logado no Firestore.
+   */
   const listarUsuario = () => {
-      const refUsuario = firestore.collection("Usuario")
-          .doc(auth.currentUser?.uid)
-          .get()
-          .then(DocumentSnapshot =>{
-              setUsuario({
-                  id: DocumentSnapshot.id,
-                  ...DocumentSnapshot.data()
-              })                
-          })
-      
-  } 
+    const refUsuario = firestore.collection("Usuario")
+      .doc(auth.currentUser?.uid)
+      .get()
+      .then((documentSnapshot) => {
+        if (documentSnapshot.exists) {
+          setUsuario({
+            id: documentSnapshot.id,
+            ...documentSnapshot.data()
+          } as Usuario);
+        }
+      });
+  };
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>Bem-vindo!</Text>
 
-        {usuario.tipo === '2' && (
-          
+        {usuario?.tipo === '2' && (
           <Text style={styles.titulo}>Você é um usuário administrador</Text>
         )}
 

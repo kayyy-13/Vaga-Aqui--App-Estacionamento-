@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, Button, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../estilo';
 
+/**
+ * Tela de login para usuários comuns.
+ * Permite autenticação via email e senha, verificando tipo de usuário.
+ */
 export default function Login() {
-  const[email, setEmail] = useState('')
-  const[senha, setSenha] = useState('')
+  const [email, setEmail] = useState(''); // Estado para email do usuário
+  const [senha, setSenha] = useState(''); // Estado para senha do usuário
 
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
+  /**
+   * Realiza login do usuário, verificando se é usuário comum.
+   */
   const logar = async () => {
     try {
       const userCredentials = await auth.signInWithEmailAndPassword(email, senha);
@@ -29,11 +36,11 @@ export default function Login() {
     } catch (erro) {
       alert(erro.message);
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/back.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/LOGIN.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>TELA DE LOGIN</Text>
 
         <View style={styles.inputView}>
@@ -41,7 +48,7 @@ export default function Login() {
             label='E-mail'
             onChangeText={texto => setEmail(texto)}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor='#005A5B'
           />
 
           <TextInput
@@ -49,9 +56,9 @@ export default function Login() {
             onChangeText={texto => setSenha(texto)}
             secureTextEntry={true}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor='#005A5B'
           />
-        </View>      
+        </View>
 
         <View style={styles.buttonView}>
           <TouchableOpacity style={styles.button} onPress={logar}>
@@ -62,12 +69,12 @@ export default function Login() {
             <Text style={[styles.buttonText, styles.buttonOutlineText]}>Login como Administrador</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={() => navigation.replace('Register')}>
-            <Text style={[styles.buttonText, styles.buttonSecText]}>Registrar</Text>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.replace('Register')}>
+            <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Criar Conta</Text>
           </TouchableOpacity>
         </View>
 
-      </ImageBackground>      
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }

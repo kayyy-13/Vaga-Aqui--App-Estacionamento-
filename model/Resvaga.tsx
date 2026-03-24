@@ -24,18 +24,6 @@ export class Resvaga {
         }
     }
 
-    toString() {
-        const objeto = `{
-            "id"   :   "${this.id}",
-            "tipo" :   "${this.tipo}",
-            "idVaga" :   "${this.idVaga}",
-            "data" :   "${this.data}",
-            "hora" :   "${this.hora}",
-            "expiraEm" :   "${this.expiraEm}",
-        }`;
-        return objeto;
-    }
-
     toFirestore() {
         const Resvaga = {
             id   : this.id,

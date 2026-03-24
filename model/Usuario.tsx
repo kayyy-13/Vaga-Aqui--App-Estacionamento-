@@ -20,19 +20,6 @@ export class Usuario {
         }
     }
 
-    toString() {
-        const objeto = `{
-            "id"    :   "${this.id}",
-            "nome"  :   "${this.nome}",
-            "email" :   "${this.email}",
-            "senha" :   "${this.senha}",
-            "fone"  :   "${this.fone}",
-            "PCD"   :   "${this.PCD}",
-            "tipo"  :   "${this.tipo}"
-        }`
-        return objeto
-    }
-
     toFirestore(){
         const usuario = {
             id      : this.id,

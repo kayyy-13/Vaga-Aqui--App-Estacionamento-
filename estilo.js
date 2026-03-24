@@ -1,41 +1,41 @@
-import { StyleSheet, Dimensions } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 const colors = {
-  primary: '#e9ce33',
+  primary: '#003840', // titulos e elementos principais
+  secondary: '#005A5B', // fundo do containerHome
+  accent1: '#007369', // lables e bordas
+  accent2: '#008C72', // Botões principais e labels de formulário
+  accent3: '#02A676', // Botão de voltar e bordas de listas
   white: '#fff',
-  bg: '#527954',
   lightGray: '#e9e9e9b8',
-};
-
-const containerBase = {
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
 };
 
 export default StyleSheet.create({
   container: {
-    ...containerBase,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     backgroundColor: colors.white,
   },
   containerHome: {
-    ...containerBase,
-    backgroundColor: colors.bg,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    backgroundColor: colors.secondary,
   },
   titulo: {
-    fontSize: Math.max(16, Math.min(width * 0.05, 24)), // Mínimo 16, máximo 24
+    fontSize: 25, //titulo principais
     fontWeight: 'bold',
     color: colors.primary,
-    marginTop: Math.max(50, height * 0.15), // Mínimo 50
-    marginBottom: Math.max(20, height * 0.05),
+    marginTop: 10,
+    marginBottom: 10,
   },
   label: {
-    color: colors.primary,
+    color: colors.accent1,
     fontWeight: 'bold',
-    marginTop: 12,
+    marginTop: 10, //distancia de itens
   },
   text: {
     fontSize: 16,
@@ -43,7 +43,7 @@ export default StyleSheet.create({
     marginBottom: 10,
   },
   inputView: {
-    width: '85%', // Aumentado para melhor adaptação
+    width: '85%',
     marginBottom: 20,
   },
   input: {
@@ -56,50 +56,100 @@ export default StyleSheet.create({
     paddingLeft: 8,
   },
   textPicker: {
-    fontSize: Math.max(14, Math.min(width * 0.04, 18)),
+    fontSize: 16,
   },
   buttonView: {
-    width: '85%', // Aumentado
+    width: '85%',
   },
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent2,
     width: '100%',
-    padding: Math.max(20, height * 0.025), // Aumentado mínimo para 20
+    padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50, // Altura mínima para garantir visibilidade
+    minHeight: 50,
   },
   buttonText: {
-    color: '#000', // Mudado para preto para melhor contraste
+    color: colors.red,
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
   },
   buttonSecondary: {
     backgroundColor: colors.white,
-    borderColor: colors.primary,
+    borderColor: colors.accent1,
     borderWidth: 2,
   },
   buttonOutline: {
     backgroundColor: colors.white,
-    borderColor: colors.primary,
+    borderColor: colors.accent1,
     borderWidth: 2,
   },
   buttonOutlineText: {
-    color: colors.primary,
+    color: colors.accent1,
   },
+  buttonFlex: {
+    flex: 1,
+  },
+  //cancelar reserva
+  buttonDelete: {
+    backgroundColor: '#d32f2f',
+    flex: 1,
+  },
+  //style "minhas reservas"
   listItem: {
     backgroundColor: colors.lightGray,
-    borderBottomWidth: StyleSheet.hairlineWidth * 2,
-    borderBottomColor: colors.primary,
-    padding: Math.max(8, width * 0.025), // Mínimo 8
-    marginTop: Math.max(10, height * 0.02),
-    width: width * 0.85, // Largura baseada na tela
+    borderBottomWidth: 1,
+    borderBottomColor: colors.accent3,
+    padding: 10,
+    marginTop: 10,
+    width: '90%',
     borderRadius: 10,
+    alignSelf: 'center',
   },
   listText: {
-    fontSize: Math.max(14, Math.min(width * 0.045, 20)),
+    fontSize: 17,
+  },
+  labelFormTitle: {
+    color: colors.accent2,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  pickerContainer: {
+    backgroundColor: colors.white,
+    marginTop: 5,
+  },
+  backButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+    paddingTop: 10,
+  },
+  backButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.accent3,
+    padding: 10,
+    borderRadius: 10,
+  },
+  backButtonText: {
+    color: colors.white,
+    marginLeft: 14,
+    fontWeight: 'bold',
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+    gap: 10,
+  },
+  //style "perfil"
+  profileFormContainer: {
+    width: '90%',
+    marginTop: 20,
+  },
+  flatlistContentContainer: {
+    paddingBottom: 30,
   },
 });

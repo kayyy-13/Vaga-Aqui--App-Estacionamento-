@@ -33,7 +33,7 @@ export default function AdminLogin() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/login.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/LOGIN.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>LOGIN DE ADMINISTRADOR</Text>
 
         <View style={styles.inputView}>
@@ -41,7 +41,7 @@ export default function AdminLogin() {
             label='E-mail'
             onChangeText={texto => setEmail(texto)}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor='#005A5B'
           />
 
           <TextInput
@@ -49,7 +49,7 @@ export default function AdminLogin() {
             onChangeText={texto => setSenha(texto)}
             secureTextEntry={true}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor='#005A5B'
           />
         </View>
 
@@ -58,8 +58,8 @@ export default function AdminLogin() {
             <Text style={styles.buttonText}>Login como Admin</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={() => navigation.replace('Login')}>
-            <Text style={[styles.buttonText, styles.buttonSecText]}>Voltar</Text>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.replace('Login')}>
+            <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Voltar</Text>
           </TouchableOpacity>
         </View>
 

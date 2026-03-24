@@ -13,16 +13,6 @@ export class Rua {
         }
     }
 
-    toString() {
-        const objeto = `{
-            "id"    :   "${this.id}",
-            "rua"  :   "${this.rua}",
-            "vaga"  :   "${this.vaga}",
-            "status":   "${this.status}"
-        }`
-        return objeto
-    }
-
     toFirestore(){
         const rua = {
             id      : this.id,

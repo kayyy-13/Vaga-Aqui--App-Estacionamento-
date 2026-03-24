@@ -161,15 +161,15 @@ export default function CadastroResvaga() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>RESERVA DE VAGAS DE ESTACIONAMENTO</Text>
 
         <View style={styles.inputView}>
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Tipo de Vaga</Text>
+          <Text style={styles.labelFormTitle}>Tipo de Vaga</Text>
           <Picker
             selectedValue={formResvaga.tipo}
             onValueChange={valor => setFormResvaga({ ...formResvaga, tipo: valor })}
-            style={{ backgroundColor: '#fff', marginTop: 5 }}
+            style={styles.pickerContainer}
           >
             <Picker.Item label="Selecione..." value="" />
             <Picker.Item label="Normal" value="normal" />
@@ -177,7 +177,7 @@ export default function CadastroResvaga() {
             <Picker.Item label="Idoso" value="idoso" />
           </Picker>
 
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Selecionar Rua</Text>
+          <Text style={styles.labelFormTitle}>Selecionar Rua</Text>
           <Picker
             selectedValue={ruaSelecionada}
             onValueChange={valor => {
@@ -189,7 +189,7 @@ export default function CadastroResvaga() {
                 setVagasDaRuaSelecionada([]);
               }
             }}
-            style={{ backgroundColor: '#fff', marginTop: 5 }}
+            style={styles.pickerContainer}
           >
             <Picker.Item label="Selecione..." value="" />
             {ruasDisponiveis.map(rua => (
@@ -197,11 +197,11 @@ export default function CadastroResvaga() {
             ))}
           </Picker>
 
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Selecionar Vaga</Text>
+          <Text style={styles.labelFormTitle}>Selecionar Vaga</Text>
           <Picker
             selectedValue={formResvaga.idVaga}
             onValueChange={valor => setFormResvaga({ ...formResvaga, idVaga: valor })}
-            style={{ backgroundColor: '#fff', marginTop: 5 }}
+            style={styles.pickerContainer}
             enabled={ruaSelecionada !== ''}
           >
             <Picker.Item label="Selecione..." value="" />
@@ -210,7 +210,7 @@ export default function CadastroResvaga() {
             ))}
           </Picker>
 
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Data da Reserva</Text>
+          <Text style={styles.labelFormTitle}>Data da Reserva</Text>
 
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
             <TextInput
@@ -233,7 +233,7 @@ export default function CadastroResvaga() {
             />
           )}
 
-          <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>Hora da Reserva</Text>
+          <Text style={styles.labelFormTitle}>Hora da Reserva</Text>
 
           <TouchableOpacity onPress={() => setShowTimePicker(true)}>
             <TextInput

@@ -81,8 +81,8 @@ export default function CadastroRua() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>CADASTRO DE OCUPAÇÃO DE VAGAS</Text>
+      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
+        <Text style={styles.titulo}>CADASTRO DE RUAS</Text>
 
         <View style={styles.inputView}>
           <TextInput 
@@ -114,8 +114,8 @@ export default function CadastroRua() {
             <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={limpar}>
-            <Text style={[styles.buttonText, styles.buttonSecText]}>Limpar</Text>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={limpar}>
+            <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Limpar</Text>
           </TouchableOpacity>
         </View>
 

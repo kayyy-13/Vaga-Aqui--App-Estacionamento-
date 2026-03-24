@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import Login       from './screens/Login';
 import AdminLogin  from './screens/AdminLogin';
@@ -10,6 +10,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 
+/**
+ * Componente principal da aplicação.
+ * Configura a navegação entre telas usando React Navigation.
+ */
 export default function App() {
   return (
     <NavigationContainer>
@@ -23,12 +27,3 @@ export default function App() {
     
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

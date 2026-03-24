@@ -14,14 +14,6 @@ export default function Register() {
 
   const navigation = useNavigation()
 
-  const admin = () => {
-    setFormUsuario({
-      ...formUsuario,
-      tipo : '2'
-    })
-    console.log('Será admin')
-  }
-
   const normal = () => {
     setFormUsuario({
       ...formUsuario,
@@ -57,7 +49,7 @@ export default function Register() {
   
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
+      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
         <Text style={styles.titulo}>CADASTRO DE USUÁRIOS</Text>
 
         <View style={styles.inputView}>
@@ -98,11 +90,11 @@ export default function Register() {
             style={styles.input}
             activeUnderlineColor='#e9ce33ff'
           />
-         <Text style={{ color: '#e9ce33ff', fontWeight: 'bold', marginTop: 10 }}>PCD</Text>
+         <Text style={styles.labelFormTitle}>PCD</Text>
           <Picker
             selectedValue={formUsuario.PCD}
             onValueChange={valor => setFormUsuario({ ...formUsuario, PCD: valor })}
-            style={{ backgroundColor: '#fff', marginTop: 5 }}
+            style={styles.pickerContainer}
           >
             <Picker.Item label="Selecione..." value="" />
             <Picker.Item label="Não" value="não" />
@@ -119,8 +111,8 @@ export default function Register() {
             <Text style={styles.buttonText}>Registrar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonSec]} onPress={() => navigation.replace('Login')}>
-            <Text style={[styles.buttonText, styles.buttonSecText]}>Voltar</Text>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.replace('Login')}>
+            <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Voltar</Text>
           </TouchableOpacity>
         </View>
 

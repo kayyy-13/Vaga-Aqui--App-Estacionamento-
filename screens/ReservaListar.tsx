@@ -104,59 +104,61 @@ export default function ListarResvaga() {
     }
 
     return (
-        <ImageBackground source={require('../assets/tela.png')} resizeMode='stretch' style={styles.container}>
-            <View style={{flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10, paddingTop: 10}}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems: 'center'}}>
+        <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={{...styles.container, justifyContent: 'space-between'}}>
+            <View style={{ flex: 1, width: '100%' }}>
+                <FlatList
+                    data={reserva}
+                    renderItem={ ({item}) => (
+                        <View style={styles.listItem}>
+                            <Text style={styles.listText}>Data: {item.data}</Text>
+                            <Text style={styles.listText}>Hora: {item.hora}</Text>
+                            <Text style={styles.listText}>Tipo: {item.tipo}</Text>
+                            <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
+                            
+                            <View style={styles.actionButtonsRow}>
+                                {tipoUsuario === '2' && (
+                                    <>
+                                        <TouchableOpacity 
+                                            style={[styles.button, styles.buttonFlex]}
+                                            onPress={() => editar(item)}
+                                        >
+                                            <Text style={styles.buttonText}>Editar</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+                                            style={[styles.button, styles.buttonDelete]}
+                                            onPress={() => excluir(item)}
+                                        >
+                                            <Text style={styles.buttonText}>Excluir</Text>
+                                        </TouchableOpacity>
+                                    </>
+                                )}
+                                {tipoUsuario === '1' && (
+                                   <>
+                                 <TouchableOpacity 
+                                            style={[styles.button, styles.buttonFlex]}
+                                            onPress={() => editar(item)}
+                                        >
+                                            <Text style={styles.buttonText}>Editar</Text>
+                                        </TouchableOpacity>
+                                   <TouchableOpacity 
+                                        style={[styles.button, styles.buttonFlex]}
+                                        onPress={() => cancelar(item)}
+                                    >
+                                        <Text style={styles.buttonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                    </>
+                                )}
+                            </View>                                                     
+                        </View>
+                    )}
+                />
+            </View>
+            <View style={styles.backButtonContainer}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonRow}>
                     <Icon name="arrow-back" size={24} color="#1a5c47" />
-                    <Text style={{color: '#1a5c47', marginLeft: 5}}>Voltar</Text>
+                    <Text style={styles.backButtonText}>Voltar</Text>
                 </TouchableOpacity>
             </View>
-            <FlatList
-                data={reserva}
-                renderItem={ ({item}) => (
-                    <View style={styles.listItem}>
-                        <Text style={styles.listText}>Data: {item.data}</Text>
-                        <Text style={styles.listText}>Hora: {item.hora}</Text>
-                        <Text style={styles.listText}>Tipo: {item.tipo}</Text>
-                        <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
-                        
-                        <View style={{flexDirection: 'row', marginTop: 10, gap: 10}}>
-                            {tipoUsuario === '2' && (
-                                <>
-                                    <TouchableOpacity 
-                                        style={[styles.button, {flex: 1}]}
-                                        onPress={() => editar(item)}
-                                    >
-                                        <Text style={styles.buttonText}>Editar</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={[styles.button, {flex: 1, backgroundColor: '#d32f2f'}]}
-                                        onPress={() => excluir(item)}
-                                    >
-                                        <Text style={styles.buttonText}>Excluir</Text>
-                                    </TouchableOpacity>
-                                </>
-                            )}
-                            {tipoUsuario === '1' && (
-                               <>
-                             <TouchableOpacity 
-                                        style={[styles.button, {flex: 1}]}
-                                        onPress={() => editar(item)}
-                                    >
-                                        <Text style={styles.buttonText}>Editar</Text>
-                                    </TouchableOpacity>
-                               <TouchableOpacity 
-                                    style={[styles.button, {flex: 1}]}
-                                    onPress={() => cancelar(item)}
-                                >
-                                    <Text style={styles.buttonText}>Cancelar</Text>
-                                </TouchableOpacity>
-                                </>
-                            )}
-                        </View>                                                     
-                    </View>
-                )}
-            />
         </ImageBackground>
     )
 }
