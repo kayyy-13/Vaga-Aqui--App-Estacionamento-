@@ -158,4 +158,29 @@ export default StyleSheet.create({
   flatlistContentContainer: {
     paddingBottom: 30,
   },
+  dashboard: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 20,
+  },
+  metricCard: {
+    backgroundColor: colors.lightGray,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '28%',
+  },
+  metricTitle: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  metricValue: {
+    fontSize: 24,
+    color: colors.accent2,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
 });

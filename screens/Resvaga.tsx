@@ -133,7 +133,6 @@ export default function CadastroResvaga() {
     }
   };
 
-  
   const onChangeData = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -150,7 +149,6 @@ export default function CadastroResvaga() {
     setShowTimePicker(false);
     if (selectedTime) {
       setHoraSelecionada(selectedTime);
-      // format as HH:MM
       const horaFormatada = selectedTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       setFormResvaga({
         ...formResvaga,
@@ -267,8 +265,6 @@ export default function CadastroResvaga() {
           >
             <Text style={styles.backButtonText}>Salvar</Text>
           </TouchableOpacity>
-
-          
         </View>
       </ImageBackground>
     </KeyboardAvoidingView>
