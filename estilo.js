@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
 
 const colors = {
-  primary: '#003840', // titulos e elementos principais
+  primary: '#014e40', // titulos e elementos principais
   secondary: '#005A5B', // fundo do containerHome
   accent1: '#007369', // lables e bordas
-  accent2: '#008C72', // Botões principais e labels de formulário
-  accent3: '#02A676', // Botão de voltar e bordas de listas
+  accent2: '#003840', // Botões principais e labels de formulário
+  accent3: '#02A676',
+  accent4: '#005A5B', // Botão de voltar e bordas de listas
   white: '#fff',
   lightGray: '#e9e9e9b8',
 };
@@ -26,7 +27,7 @@ export default StyleSheet.create({
     backgroundColor: colors.secondary,
   },
   titulo: {
-    fontSize: 25, //titulo principais
+    fontSize: 22, //titulo principais
     fontWeight: 'bold',
     color: colors.primary,
     marginTop: 10,
@@ -72,7 +73,7 @@ export default StyleSheet.create({
     minHeight: 50,
   },
   buttonText: {
-    color: colors.red,
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
@@ -81,6 +82,11 @@ export default StyleSheet.create({
     backgroundColor: colors.white,
     borderColor: colors.accent1,
     borderWidth: 2,
+  },
+  buttonSecondaryText: {
+    color: colors.accent1,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   buttonOutline: {
     backgroundColor: colors.white,

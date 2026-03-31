@@ -162,7 +162,7 @@ export default function CadastroResvaga() {
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>RESERVA DE VAGAS DE ESTACIONAMENTO</Text>
+        <Text style={styles.titulo}>RESERVA DE VAGAS</Text>
 
         <View style={styles.inputView}>
           <Text style={styles.labelFormTitle}>Tipo de Vaga</Text>
@@ -265,7 +265,7 @@ export default function CadastroResvaga() {
             onPress={salvar}
             disabled={!(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora)}
           >
-            <Text style={styles.buttonText}>Salvar</Text>
+            <Text style={styles.backButtonText}>Salvar</Text>
           </TouchableOpacity>
 
           
