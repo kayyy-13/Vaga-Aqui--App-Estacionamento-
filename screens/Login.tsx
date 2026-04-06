@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +16,77 @@ export default function Login() {
   const navigation = useNavigation();
 
   /**
+   * Verifica reservas e mostra notificações se necessário
+   */
+  const verificarReservas = async () => {
+    try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) return;
+
+      const agora = Date.now();
+      const snapshot = await firestore
+        .collection("Usuario")
+        .doc(userId)
+        .collection("Resvaga")
+        .get();
+
+      let reservasAtivas = 0;
+      let reservasProximasAExpirar = 0;
+
+      for (const doc of snapshot.docs) {
+        const reserva = doc.data();
+
+        // Se a reserva expirou, cancelar automaticamente
+        if (reserva.expiraEm && reserva.expiraEm < agora) {
+          try {
+            // Liberar a vaga
+            await firestore
+              .collection("Ruas")
+              .doc(reserva.idVaga)
+              .update({ status: "livre" });
+
+            // Deletar a reserva
+            await doc.ref.delete();
+
+            // Notificar que a reserva foi cancelada
+            Alert.alert(
+              '❌ Reserva Cancelada',
+              `Sua reserva expirou após 30 minutos sem ocupação. A vaga foi liberada.`,
+              [{ text: 'OK', onPress: () => {} }]
+            );
+          } catch (error) {
+            console.error(`Erro ao cancelar reserva:`, error);
+          }
+        } else if (reserva.expiraEm && reserva.expiraEm > agora) {
+          reservasAtivas++;
+          const tempoRestante = reserva.expiraEm - agora;
+          const minutosRestantes = Math.ceil(tempoRestante / 60000);
+
+          // Notificar se faltam menos de 5 minutos
+          if (tempoRestante <= 5 * 60 * 1000) {
+            reservasProximasAExpirar++;
+          }
+        }
+      }
+
+      // Enviar notificação de boas-vindas com informações sobre reservas
+      if (reservasAtivas > 0) {
+        const mensagem = reservasProximasAExpirar > 0
+          ? `Você tem ${reservasAtivas} reserva(s) ativa(s). ${reservasProximasAExpirar} está(ão) próxima(s) de expirar!`
+          : `Bem-vindo! Você tem ${reservasAtivas} reserva(s) ativa(s).`;
+
+        Alert.alert(
+          '🅿️ Reservas Ativas',
+          mensagem,
+          [{ text: 'OK', onPress: () => {} }]
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao verificar reservas:', error);
+    }
+  };
+
+  /**
    * Realiza login do usuário, verificando se é usuário comum.
    */
   const logar = async () => {
@@ -28,6 +99,8 @@ export default function Login() {
       const userData = userDoc.data();
 
       if (userData?.tipo === '1') {
+        // Verificar reservas antes de navegar
+        await verificarReservas();
         navigation.replace('Menu');
       } else {
         alert('Esta é a tela de login para usuários normais. Use a tela de administrador se aplicável.');

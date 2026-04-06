@@ -42,17 +42,27 @@ export default function ListarResvaga() {
     const listar = () => {
         const subscriber = refResvaga
         .onSnapshot( async (query) => { 
-            const reserva = [];
+            const reservas: Resvaga[] = [];
             query.forEach((documento) => {
-                reserva.push({
+                reservas.push({
                     ...documento.data(),
                     key: documento.id
                 });
             });
-            setReserva(reserva);
+
+            const reservasOrdenadas = reservas.sort((a, b) => {
+                const expiredA = a.expiraEm <= Date.now() ? 1 : 0;
+                const expiredB = b.expiraEm <= Date.now() ? 1 : 0;
+                if (expiredA !== expiredB) {
+                    return expiredA - expiredB;
+                }
+                return (b.expiraEm || 0) - (a.expiraEm || 0);
+            });
+
+            setReserva(reservasOrdenadas);
 
             // Buscar detalhes das vagas
-            const ids = reserva.map(r => r.idVaga).filter(id => id);
+            const ids = reservasOrdenadas.map(r => r.idVaga).filter(id => id);
             const detalhes: {[key: string]: {rua: string, vaga: string}} = {};
             for (const id of ids) {
                 const doc = await firestore.collection("Ruas").doc(id).get();
@@ -65,7 +75,26 @@ export default function ListarResvaga() {
         return () => subscriber();
     }
 
-    const excluir = async(item) => {
+    const isExpired = (item: Resvaga) => {
+        return item.expiraEm ? item.expiraEm <= Date.now() : false;
+    };
+
+    const formatExpiration = (item: Resvaga) => {
+        if (!item.expiraEm) return '';
+        const date = new Date(item.expiraEm);
+        return date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
+
+    const canCancel = (item: Resvaga) => {
+        if (!item.expiraEm) return false;
+        
+        const now = Date.now();
+        
+        // Pode cancelar se ainda não expirou
+        return now <= item.expiraEm;
+    };
+
+    const excluir = async(item: Resvaga) => {
         const resultado = await refResvaga
          .doc(item.id)
          .delete()
@@ -75,7 +104,7 @@ export default function ListarResvaga() {
          })
     }
 
-    const cancelar = async(item) => {
+    const cancelar = async(item: Resvaga) => {
         Alert.alert(
             "Confirmação",
             "Você tem certeza disso?",
@@ -97,60 +126,72 @@ export default function ListarResvaga() {
         );
     }
 
-    const editar = 
-    (item: Resvaga) => {
-        navigation.navigate
-        ("Cadastro de Reserva", {resvaga:item});
+    const editar = (item: Resvaga) => {
+        navigation.navigate("Cadastro de Reserva", {resvaga:item});
     }
 
     return (
         <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={{...styles.container, justifyContent: 'space-between'}}>
             <View style={{ flex: 1, width: '100%' }}>
+                <Text style={styles.titulo}>Minhas de Reservas</Text>
                 <FlatList
                     data={reserva}
-                    renderItem={ ({item}) => (
-                        <View style={styles.listItem}>
-                            <Text style={styles.listText}>Data: {item.data}</Text>
-                            <Text style={styles.listText}>Hora: {item.hora}</Text>
-                            <Text style={styles.listText}>Tipo: {item.tipo}</Text>
-                            <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
-                            
-                            <View style={styles.actionButtonsRow}>
-                                {tipoUsuario === '2' && (
-                                    <>
-                                        <TouchableOpacity 
-                                            style={[styles.button, styles.buttonFlex]}
-                                            onPress={() => editar(item)}
-                                        >
-                                            <Text style={styles.buttonText}>Editar</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity 
-                                            style={[styles.button, styles.buttonDelete]}
-                                            onPress={() => excluir(item)}
-                                        >
-                                            <Text style={styles.buttonText}>Excluir</Text>
-                                        </TouchableOpacity>
-                                    </>
-                                )}
-                                {tipoUsuario === '1' && (
-                                   <>
-                                 <TouchableOpacity 
-                                            style={[styles.button, styles.buttonFlex]}
-                                            onPress={() => editar(item)}
-                                        >
-                                            <Text style={styles.buttonText}>Editar</Text>
-                                        </TouchableOpacity>
-                                   <TouchableOpacity 
-                                        style={[styles.button, styles.buttonFlex]}
-                                        onPress={() => cancelar(item)}
-                                    >
-                                        <Text style={styles.buttonText}>Cancelar</Text>
-                                    </TouchableOpacity>
-                                    </>
-                                )}
-                            </View>                                                     
-                        </View>
-                    )}
+                    renderItem={ ({item}) => {
+                        const expired = isExpired(item);
+                        return (
+                            <View style={styles.listItem}>
+                                <Text style={styles.listText}>Data: {item.data}</Text>
+                                <Text style={styles.listText}>Hora: {item.hora}</Text>
+                                <Text style={styles.listText}>Tipo: {item.tipo}</Text>
+                                <Text style={styles.listText}>Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}</Text>
+                                <Text style={[styles.listText, expired ? styles.expiredText : styles.activeText]}>
+                                    Status: {expired ? 'Expirada' : 'Ativa'}
+                                </Text>
+                                {item.expiraEm ? (
+                                    <Text style={[styles.listText, expired ? styles.expiredText : styles.activeText]}>
+                                        {expired ? 'Expirou em:' : 'Expira em:'} {formatExpiration(item)}
+                                    </Text>
+                                ) : null}
+
+                                <View style={styles.actionButtonsRow}>
+                                    {tipoUsuario === '2' && (
+                                        <>
+                                            <TouchableOpacity 
+                                                style={[styles.button, styles.buttonFlex]}
+                                                onPress={() => editar(item)}
+                                            >
+                                                <Text style={styles.buttonText}>Editar</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity 
+                                                style={[styles.button, styles.buttonDelete]}
+                                                onPress={() => excluir(item)}
+                                            >
+                                                <Text style={styles.buttonText}>Excluir</Text>
+                                            </TouchableOpacity>
+                                        </>
+                                    )}
+                                    {tipoUsuario === '1' && (
+                                        <>
+                                            <TouchableOpacity 
+                                                style={[styles.button, styles.buttonFlex]}
+                                                onPress={() => editar(item)}
+                                            >
+                                                <Text style={styles.buttonText}>Editar</Text>
+                                            </TouchableOpacity>
+                                            {canCancel(item) && (
+                                                <TouchableOpacity 
+                                                    style={[styles.button, styles.buttonFlex]}
+                                                    onPress={() => cancelar(item)}
+                                                >
+                                                    <Text style={styles.buttonText}>Cancelar</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </>
+                                    )}
+                                </View>                                                     
+                            </View>
+                        );
+                    }}
                 />
             </View>
             <View style={styles.backButtonContainer}>

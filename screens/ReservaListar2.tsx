@@ -11,12 +11,14 @@ type ReservaAdmin = {
     data: string;
     hora: string;
     dia: string;
+    status: 'Ativa' | 'Finalizada';
 };
 
 export default function ReservaListar2() {
     const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [detalhesVagas, setDetalhesVagas] = useState<{ [key: string]: { rua: string; vaga: string } }>({});
+    const [filtro, setFiltro] = useState<'Ativas' | 'Finalizadas'>('Ativas');
 
     useEffect(() => {
         listarReservas();
@@ -68,7 +70,19 @@ export default function ReservaListar2() {
                     .get();
 
                 reservasSnapshot.forEach((reservaDoc) => {
-                    const dadosReserva = reservaDoc.data();
+                            const dadosReserva = reservaDoc.data();
+                    const agora = Date.now();
+                    let status: 'Ativa' | 'Finalizada' = 'Finalizada';
+
+                    if (dadosReserva?.expiraEm != null) {
+                        status = dadosReserva.expiraEm > agora ? 'Ativa' : 'Finalizada';
+                    } else if (dadosReserva?.data && dadosReserva?.hora) {
+                        const partes = dadosReserva.data.split('/').map(Number);
+                        const [dia, mes, ano] = partes;
+                        const [horaStr, minutoStr] = (dadosReserva.hora || '').split(':').map(Number);
+                        const dataHora = new Date(ano, (mes || 1) - 1, dia || 1, horaStr || 0, minutoStr || 0);
+                        status = dataHora.getTime() > agora ? 'Ativa' : 'Finalizada';
+                    }
 
                     reservasColetadas.push({
                         id: reservaDoc.id,
@@ -78,6 +92,7 @@ export default function ReservaListar2() {
                         data: dadosReserva?.data || '',
                         hora: dadosReserva?.hora || '',
                         dia: obterDiaSemana(dadosReserva?.data),
+                        status,
                     });
                 });
             }
@@ -118,6 +133,11 @@ export default function ReservaListar2() {
         }
     };
 
+    const reservasFiltradas = reservas.filter(item => {
+        if (filtro === 'Ativas') return item.status === 'Ativa';
+        return item.status === 'Finalizada';
+    });
+
     const cancelarReserva = (item: ReservaAdmin) => {
         Alert.alert(
             'Confirmação',
@@ -155,25 +175,55 @@ export default function ReservaListar2() {
         <ImageBackground source={require('../assets/fundo.png')} resizeMode="stretch" style={styles.container}>
             <Text style={styles.titulo}>Reservas do App</Text>
 
+            <View style={styles.filterContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.filterButton,
+                        filtro === 'Ativas' ? styles.filterButtonActive : styles.filterButtonInactive,
+                    ]}
+                    onPress={() => setFiltro('Ativas')}
+                >
+                    <Text
+                        style={filtro === 'Ativas' ? styles.filterButtonTextActive : styles.filterButtonTextInactive}
+                    >
+                        Ativas
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.filterButton,
+                        filtro === 'Finalizadas' ? styles.filterButtonActive : styles.filterButtonInactive,
+                    ]}
+                    onPress={() => setFiltro('Finalizadas')}
+                >
+                    <Text
+                        style={filtro === 'Finalizadas' ? styles.filterButtonTextActive : styles.filterButtonTextInactive}
+                    >
+                        Finalizadas
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
             {carregando ? (
                 <Text style={styles.listText}>Carregando reservas...</Text>
             ) : (
                 <FlatList
-                    data={reservas}
+                    data={reservasFiltradas}
                     keyExtractor={(item) => `${item.idUsuario}-${item.id}`}
                     contentContainerStyle={styles.flatlistContentContainer}
                     ListEmptyComponent={<Text style={styles.listText}>Nenhuma reserva encontrada.</Text>}
                     renderItem={({ item }) => (
                         <View style={styles.listItem}>
                             <Text style={styles.listText}>Usuário: {item.nomeUsuario}</Text>
-                            <Text style={styles.listText}>Dia: {item.dia || 'Não informado'}</Text>
-                            <Text style={styles.listText}>Data: {item.data || 'Não informada'}</Text>
-                            <Text style={styles.listText}>Hora: {item.hora || 'Não informada'}</Text>
                             <Text style={styles.listText}>
-                                Vaga:{' '}
+                                Rua:{' '}
                                 {detalhesVagas[item.idVaga]
                                     ? `${detalhesVagas[item.idVaga].rua} - vaga ${detalhesVagas[item.idVaga].vaga}`
                                     : item.idVaga || 'Não informada'}
+                            </Text>
+                            <Text style={styles.listText}>Horário: {item.data || 'Não informada'} {item.hora || ''}</Text>
+                            <Text style={[styles.listText, item.status === 'Ativa' ? styles.activeText : styles.expiredText]}>
+                                Status: {item.status}
                             </Text>
 
                             <TouchableOpacity

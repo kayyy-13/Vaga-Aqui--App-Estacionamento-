@@ -112,7 +112,7 @@ export default function CadastroResvaga() {
       } else {
         const idResvaga = refResvaga.doc();
         novoResvaga.id = idResvaga.id;
-        novoResvaga.expiraEm = Date.now() + 15 * 60 * 1000; // 15 minutos
+        novoResvaga.expiraEm = Date.now() + 30 * 60 * 1000; // 30 minutos
         await idResvaga.set(novoResvaga.toFirestore());
 
         // Atualizar status da vaga para ocupada
@@ -228,6 +228,7 @@ export default function CadastroResvaga() {
               display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
               onChange={onChangeData}
               minimumDate={new Date()}
+              maximumDate={new Date()}
             />
           )}
 

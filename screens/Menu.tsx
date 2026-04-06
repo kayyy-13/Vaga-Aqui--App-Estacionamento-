@@ -3,25 +3,41 @@ import * as React from "react";
 import Home         from "./Home";
 import Rua         from "./Rua";
 import Reserva          from "./Resvaga";
-import ReservaListar    from "./ReservaListar";
 import ReservaListar2   from "./ReservaListar2";
 import Profile from './Profile';
 import Admin from './Admin';
+import UserManagement from './UserManagement';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons as Icon } from '@expo/vector-icons';
 
 import { Usuario } from "../model/Usuario";
 import { auth, firestore } from "../firebase";
 import { useEffect, useState } from "react";
+import { useReservationNotifications } from "../hooks/useReservationNotifications";
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function TabNavigator({ usuario }: { usuario: Usuario | null }) {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }} id={undefined}>
+            <Stack.Screen name="MainTabs" component={() => <TabNavigator usuario={usuario} />} />
+        </Stack.Navigator>
+    );
+}
 
 export default function Menu() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const { verificarReservasExpiradas, verificarReservasProximasAExpirar } = useReservationNotifications();
 
     useEffect(() => {
         listarUsuario();
+        
+        // Verificar reservas imediatamente ao entrar na tela
+        verificarReservasExpiradas();
+        verificarReservasProximasAExpirar();
     }, []);
 
     const listarUsuario = () => {
@@ -60,12 +76,6 @@ export default function Menu() {
                             component={Reserva}
                             options={{ tabBarIcon: ({ color, size }) => <Icon name="car" size={size} color={color} /> }}
                         />
-
-                        <Tab.Screen
-                            name='Minhas Reservas'
-                            component={ReservaListar}
-                            options={{ tabBarIcon: ({ color, size }) => <Icon name="list" size={size} color={color} /> }}
-                        />
                     </>
                 )}
 
@@ -80,6 +90,14 @@ export default function Menu() {
                         name='Admin'
                         component={Admin}
                         options={{ tabBarIcon: ({ color, size }) => <Icon name="lock-closed" size={size} color={color} /> }}
+                    />
+                )}
+
+                {usuario?.tipo === '2' && (
+                    <Tab.Screen
+                        name='Gerenciar Usuários'
+                        component={UserManagement}
+                        options={{ tabBarButton: () => null }}
                     />
                 )}
 

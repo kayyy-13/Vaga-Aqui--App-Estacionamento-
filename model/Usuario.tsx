@@ -6,17 +6,28 @@ export class Usuario {
     public fone:    string;
     public PCD:     string;
     public tipo:    string;
+    public bloqueado: boolean;
     
 
     constructor(obj?: Partial<Usuario>){
         if(obj){
-            this.id     = obj.id
-            this.nome   = obj.nome
-            this.email  = obj.email
-            this.senha  = obj.senha
-            this.fone   = obj.fone
-            this.PCD    = obj.PCD
-            this.tipo   = obj.tipo
+            this.id     = obj.id || '';
+            this.nome   = obj.nome || '';
+            this.email  = obj.email || '';
+            this.senha  = obj.senha || '';
+            this.fone   = obj.fone || '';
+            this.PCD    = obj.PCD || '';
+            this.tipo   = obj.tipo || '';
+            this.bloqueado = obj.bloqueado || false;
+        } else {
+            this.id = '';
+            this.nome = '';
+            this.email = '';
+            this.senha = '';
+            this.fone = '';
+            this.PCD = '';
+            this.tipo = '';
+            this.bloqueado = false;
         }
     }
 
@@ -28,7 +39,8 @@ export class Usuario {
             senha   : this.senha,
             fone    : this.fone,
             PCD     : this.PCD,
-            tipo    : this.tipo
+            tipo    : this.tipo,
+            bloqueado: this.bloqueado
         }
         return usuario
     }

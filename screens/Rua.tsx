@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, Button, TouchableOpacity, ImageBackground} from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import styles from '../estilo';
 
-import { Picker } from '@react-native-picker/picker';
-
 import { Rua } from '../model/Rua';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
 
 export default function CadastroRua() {
   const[formRua, setFormRua] = useState<Partial<Rua>>({})
@@ -46,20 +43,27 @@ export default function CadastroRua() {
     const refRua = firestore.collection("Ruas")
 
     if (formRua.id) {
-      // Editar uma vaga específica
-      const idRua  = refRua.doc(formRua.id);
+      const idRua = refRua.doc(formRua.id);
       idRua.update(new Rua(formRua).toFirestore())
-      .then( () => {
-        alert('Vaga atualizada!');
-        limpar();
-      })
+        .then(() => {
+          alert('Rua atualizada!');
+          setFormRua({});
+        })
+        .catch(error => {
+          console.error('Erro ao atualizar rua:', error);
+          alert('Erro ao atualizar rua.');
+        });
     } else {
-      // Cadastrar múltiplas vagas
       const quantidade = parseInt(formRua.vaga);
-      if (!quantidade || quantidade <= 0) {
-        alert('Quantidade de vagas deve ser um número maior que 0');
+      if (!formRua.rua?.trim()) {
+        alert('Informe o nome da rua.');
         return;
       }
+      if (!quantidade || quantidade <= 0) {
+        alert('Número de vagas deve ser maior que 0.');
+        return;
+      }
+
       for (let i = 1; i <= quantidade; i++) {
         const novaVaga = new Rua({
           rua: formRua.rua,
@@ -70,56 +74,40 @@ export default function CadastroRua() {
         novaVaga.id = idRua.id;
         idRua.set(novaVaga.toFirestore());
       }
-      alert('Vagas cadastradas com sucesso!');
-      limpar();
+      alert('Cadastro realizado com sucesso!');
+      setFormRua({});
     }
-  }
-
-  const limpar = () => {
-    setFormRua({});
   }
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>CADASTRO DE RUAS</Text>
+      <View style={styles.container}>
+        <Text style={styles.titulo}>🛣️ Cadastro de Rua</Text>
 
         <View style={styles.inputView}>
-          <TextInput 
-            label='Nome da Rua' 
-            onChangeText={valor => setFormRua({
-              ...formRua,
-              rua : valor
-            })}            
+          <TextInput
+            label='Nome da rua'
+            onChangeText={valor => setFormRua({ ...formRua, rua: valor })}
             style={styles.input}
             activeUnderlineColor='#e9ce33ff'
             value={formRua.rua}
           />
-           <TextInput 
-            label='Quantidade de Vagas' 
-            onChangeText={valor => setFormRua({
-              ...formRua,
-              vaga : valor
-            })}            
+          <TextInput
+            label='Número de vagas'
+            onChangeText={valor => setFormRua({ ...formRua, vaga: valor })}
             style={styles.input}
             activeUnderlineColor='#e9ce33ff'
             value={formRua.vaga}
             keyboardType='numeric'
           />
-
         </View>
 
         <View style={styles.buttonView}>
           <TouchableOpacity style={styles.button} onPress={salvar}>
-            <Text style={styles.buttonText}>Salvar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={limpar}>
-            <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Limpar</Text>
+            <Text style={styles.buttonText}>✅ Salvar</Text>
           </TouchableOpacity>
         </View>
-
-      </ImageBackground>
+      </View>
     </KeyboardAvoidingView>
   );
 }

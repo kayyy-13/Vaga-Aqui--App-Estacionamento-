@@ -32,6 +32,7 @@ export default function Admin() {
       const hoje = new Date().toLocaleDateString('pt-BR');
       let ocupadas = 0;
       let dia = 0;
+
       reservasSnap.forEach(doc => {
         const res = new Resvaga(doc.data());
         if (res.expiraEm > Date.now()) {
@@ -54,20 +55,50 @@ export default function Admin() {
 
       <View style={styles.dashboard}>
         <View style={styles.metricCard}>
-          <Text style={styles.metricTitle}>Total de Vagas</Text>
+          <Text style={styles.metricTitle}>🚗 Total de Vagas</Text>
           <Text style={styles.metricValue}>{totalVagas}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricTitle}>Vagas Ocupadas</Text>
+          <Text style={styles.metricTitle}>🔴 Vagas Ocupadas</Text>
           <Text style={styles.metricValue}>{vagasOcupadas}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricTitle}>Reservas do Dia</Text>
+          <Text style={styles.metricTitle}>� Reservas do Dia</Text>
           <Text style={styles.metricValue}>{reservasDia}</Text>
         </View>
       </View>
 
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Visão geral rápida</Text>
+        <View style={styles.chartBars}>
+          {[
+            { label: 'Total', value: totalVagas, color: '#02A676', formatted: `${totalVagas}` },
+            { label: 'Ocupadas', value: vagasOcupadas, color: '#d32f2f', formatted: `${vagasOcupadas}` },
+            { label: 'Dia', value: reservasDia, color: '#005A5B', formatted: `${reservasDia}` },
+          ].map(item => {
+            const maxValue = Math.max(totalVagas, vagasOcupadas, reservasDia, 1);
+            const height = (item.value / maxValue) * 140;
+            return (
+              <View key={item.label} style={styles.chartColumn}>
+                <View style={[styles.chartBar, { height: Math.max(height, 20) }]}> 
+                  <View style={[styles.chartBarFill, { backgroundColor: item.color }]} />
+                </View>
+                <Text style={styles.chartValueLabel}>{item.formatted}</Text>
+                <Text style={styles.chartBarLabel}>{item.label}</Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
       <View style={styles.buttonView}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Gerenciar Usuários')}
+        >
+          <Text style={styles.buttonText}>👥 Gerenciar Usuários</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('Cadastro de Ruas')}
