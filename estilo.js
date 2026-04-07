@@ -4,7 +4,7 @@ const colors = {
   primary: '#014e40', // titulos e elementos principais
   secondary: '#005A5B', // fundo do containerHome
   accent1: '#007369', // lables e bordas
-  accent2: '#003840', // Botões principais e labels de formulário
+  accent2: '#6e8788', // Botões principais e labels de formulário
   accent3: '#02A676',
   accent4: '#005A5B', // Botão de voltar e bordas de listas
   white: '#fff',
@@ -361,5 +361,303 @@ export default StyleSheet.create({
     fontSize: 12,
     color: colors.accent1,
     marginTop: 2,
+  },
+  reservaScrollContent: {
+    width: '100%',
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 32,
+  },
+  reservaScreen: {
+    flex: 1,
+    width: '100%',
+  },
+  reservaList: {
+    flex: 1,
+    width: '100%',
+  },
+  reservaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
+  reservaIconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reservaHeaderTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.primary,
+  },
+  reservaSearchWrapper: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  reservaSearchIcon: {
+    position: 'absolute',
+    left: 14,
+    top: 20,
+    zIndex: 1,
+  },
+  reservaSearchInput: {
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    paddingLeft: 26,
+    borderRadius: 14,
+  },
+  reservaFilterRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 18,
+  },
+  reservaFilterChip: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 999,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  reservaFilterChipActive: {
+    backgroundColor: colors.accent2,
+    borderColor: colors.accent2,
+  },
+  reservaFilterChipInactive: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: colors.accent1,
+  },
+  reservaFilterChipTextActive: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+  reservaFilterChipTextInactive: {
+    color: colors.accent1,
+    fontWeight: '700',
+  },
+  reservaRefreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 18,
+    gap: 8,
+  },
+  reservaRefreshButtonText: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  reservaListContent: {
+    paddingBottom: 24,
+  },
+  reservaListSeparator: {
+    height: 14,
+  },
+  reservaCardsContainer: {
+    gap: 14,
+  },
+  reservaStreetCard: {
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(1,78,64,0.08)',
+  },
+  reservaStreetCardPressed: {
+    transform: [{ scale: 0.985 }],
+    opacity: 0.92,
+  },
+  reservaStreetCardSelected: {
+    borderColor: colors.accent3,
+    shadowColor: '#003840',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  reservaStreetTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+  },
+  reservaStreetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primary,
+  },
+  reservaStreetMeta: {
+    color: '#5d6a67',
+    marginTop: 4,
+    fontSize: 13,
+  },
+  reservaStreetCount: {
+    fontSize: 16,
+    color: colors.accent2,
+    fontWeight: '700',
+    marginBottom: 14,
+  },
+  reservaBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+  },
+  reservaBadgeAvailable: {
+    backgroundColor: 'rgba(2,166,118,0.14)',
+  },
+  reservaBadgeFull: {
+    backgroundColor: 'rgba(211,47,47,0.12)',
+  },
+  reservaBadgeTextAvailable: {
+    color: '#007369',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+  reservaBadgeTextFull: {
+    color: '#d32f2f',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+  reservaStreetButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  reservaStreetButtonActive: {
+    backgroundColor: colors.accent2,
+  },
+  reservaStreetButtonDisabled: {
+    backgroundColor: '#b9c1bf',
+  },
+  reservaStreetButtonText: {
+    color: colors.white,
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  reservaEmptyCard: {
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    padding: 22,
+    alignItems: 'center',
+  },
+  reservaEmptyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.primary,
+    marginBottom: 6,
+  },
+  reservaEmptyText: {
+    color: '#5d6a67',
+    textAlign: 'center',
+  },
+  reservaLoadingCard: {
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  reservaLoadingText: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  reservaFormCard: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 20,
+    padding: 18,
+    marginTop: 22,
+  },
+  reservaFormTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  reservaFormSubtitle: {
+    fontSize: 14,
+    color: '#5d6a67',
+    marginBottom: 10,
+  },
+  reservaSubmitDisabled: {
+    backgroundColor: '#aab3b0',
+  },
+  homeScreen: {
+    flex: 1,
+    width: '100%',
+  },
+  homeContent: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 28,
+  },
+  homeGreeting: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  homeSubtitle: {
+    fontSize: 16,
+    color: colors.accent2,
+    marginBottom: 18,
+  },
+  homeMiniList: {
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    padding: 16,
+    gap: 10,
+  },
+  homeMiniListItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(1,78,64,0.06)',
+  },
+  homeMiniListText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  homeAdminHint: {
+    marginTop: 18,
+    color: colors.accent1,
+    fontWeight: '700',
+  },
+  homeAdminGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+  },
+  homeAdminCard: {
+    width: '47%',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    padding: 18,
+  },
+  homeAdminCardWide: {
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    padding: 18,
+  },
+  homeAdminLabel: {
+    color: colors.accent1,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  homeAdminValue: {
+    color: colors.primary,
+    fontSize: 30,
+    fontWeight: '800',
   },
 });

@@ -43,7 +43,6 @@ export default function Profile() {
 
     listarUsuario();
   }, []);
-
   const logout = () => {
     auth
       .signOut()
@@ -79,10 +78,10 @@ export default function Profile() {
       }
 
       const reservasOrdenadas = reservas.sort((a, b) => {
-        const expiredA = a.expiraEm <= Date.now() ? 1 : 0;
-        const expiredB = b.expiraEm <= Date.now() ? 1 : 0;
-        if (expiredA !== expiredB) return expiredA - expiredB;
-        return (b.expiraEm || 0) - (a.expiraEm || 0);
+        const finalizadaA = (a.statusReserva === 'cancelada' || a.statusReserva === 'expirada') ? 1 : 0;
+        const finalizadaB = (b.statusReserva === 'cancelada' || b.statusReserva === 'expirada') ? 1 : 0;
+        if (finalizadaA !== finalizadaB) return finalizadaA - finalizadaB;
+        return (b.finalizadaEm || b.expiraEm || 0) - (a.finalizadaEm || a.expiraEm || 0);
       });
 
       setDetalhesVagas(detalhes);
@@ -95,12 +94,16 @@ export default function Profile() {
   };
 
   const isExpired = (item: Resvaga) => {
-    return item.expiraEm ? item.expiraEm <= Date.now() : false;
+    return item.statusReserva === 'cancelada' || item.statusReserva === 'expirada' || (item.expiraEm ? item.expiraEm <= Date.now() : false);
   };
 
   const formatExpiration = (item: Resvaga) => {
-    if (!item.expiraEm) return '';
-    const date = new Date(item.expiraEm);
+    const timestamp = item.statusReserva === 'cancelada' || item.statusReserva === 'expirada'
+      ? item.finalizadaEm || item.expiraEm
+      : item.expiraEm;
+
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
     return date.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -111,7 +114,7 @@ export default function Profile() {
   };
 
   const canCancel = (item: Resvaga) => {
-    if (!item.expiraEm) return false;
+    if (!item.expiraEm || item.statusReserva === 'cancelada' || item.statusReserva === 'expirada') return false;
     
     const now = Date.now();
     
@@ -127,11 +130,13 @@ export default function Profile() {
         { text: "Não", style: "cancel" },
         { text: "Sim", onPress: async () => {
           try {
-            await firestore.collection('Usuario').doc(auth.currentUser?.uid).collection('Resvaga').doc(item.id).delete();
-            // Liberar a vaga
+            await firestore.collection('Usuario').doc(auth.currentUser?.uid).collection('Resvaga').doc(item.id).update({
+              statusReserva: 'cancelada',
+              finalizadaEm: Date.now(),
+            });
             await firestore.collection("Ruas").doc(item.idVaga).update({ status: "livre" });
             Alert.alert('Sucesso', 'Reserva cancelada com sucesso!');
-            // Recarregar histórico
+            setActiveTab('finalizadas');
             loadHistory();
           } catch (e) {
             console.error("Erro ao cancelar reserva:", e);
@@ -363,8 +368,8 @@ export default function Profile() {
 
   if (showHistory) {
     const filteredHistorico = historico.filter(item => {
-      const expired = isExpired(item);
-      return activeTab === 'ativas' ? !expired : expired;
+      const finalizada = item.statusReserva === 'cancelada' || item.statusReserva === 'expirada' || isExpired(item);
+      return activeTab === 'ativas' ? !finalizada : finalizada;
     });
 
     return (
@@ -410,11 +415,11 @@ export default function Profile() {
                     Vaga: {detalhesVagas[item.idVaga] ? `${detalhesVagas[item.idVaga].rua} - ${detalhesVagas[item.idVaga].vaga}` : item.idVaga}
                   </Text>
                   <Text style={[styles.listText, expired ? styles.expiredText : styles.activeText]}>
-                    Status: {expired ? 'Expirada' : 'Ativa'}
+                    Status: {item.statusReserva === 'cancelada' ? 'Cancelada' : item.statusReserva === 'expirada' || expired ? 'Expirada' : 'Ativa'}
                   </Text>
                   {item.expiraEm ? (
                     <Text style={[styles.listText, expired ? styles.expiredText : styles.activeText]}>
-                      {expired ? 'Expirou em:' : 'Expira em:'} {formatExpiration(item)}
+                      {item.statusReserva === 'cancelada' ? 'Finalizada em:' : expired ? 'Expirou em:' : 'Expira em:'} {formatExpiration(item)}
                     </Text>
                   ) : null}
                   {activeTab === 'ativas' && (
@@ -466,7 +471,7 @@ export default function Profile() {
       <View style={styles.optionsContainer}>
         {usuario?.tipo !== '2' && (
           <>
-<TouchableOpacity style={styles.optionItem} onPress={() => handleNavigate('VehicleRegistration')}>
+            <TouchableOpacity style={styles.optionItem} onPress={() => handleNavigate('VehicleRegistration')}>
               <Text style={styles.optionIcon}>🚗</Text>
               <Text style={styles.optionText}>Meus veículos</Text>
             </TouchableOpacity>

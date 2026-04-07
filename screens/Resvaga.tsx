@@ -1,13 +1,29 @@
-import { useEffect, useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Platform } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Platform, ScrollView, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import styles from '../estilo';
 
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Resvaga } from '../model/Resvaga';
+
+type VagaOption = {
+  id: string;
+  vaga: string;
+  status: string;
+};
+
+type RuaCard = {
+  nome: string;
+  total: number;
+  livres: number;
+  ocupadas: number;
+  vagasSelecionaveis: VagaOption[];
+  possuiVagaSelecionavel: boolean;
+};
 
 export default function CadastroResvaga() {
   const [formResvaga, setFormResvaga] = useState<Partial<Resvaga>>({});
@@ -15,76 +31,165 @@ export default function CadastroResvaga() {
   const [dataSelecionada, setDataSelecionada] = useState<Date | undefined>(undefined);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [horaSelecionada, setHoraSelecionada] = useState<Date | undefined>(undefined);
-  const [vagasDisponiveis, setVagasDisponiveis] = useState<any[]>([]);
-  const [ruasDisponiveis, setRuasDisponiveis] = useState<any[]>([]);
-  const [vagasDaRuaSelecionada, setVagasDaRuaSelecionada] = useState<any[]>([]);
+  const [ruasResumo, setRuasResumo] = useState<RuaCard[]>([]);
+  const [vagasDaRuaSelecionada, setVagasDaRuaSelecionada] = useState<VagaOption[]>([]);
   const [ruaSelecionada, setRuaSelecionada] = useState<string>('');
   const [idVagaAntiga, setIdVagaAntiga] = useState<string>('');
+  const [buscaRua, setBuscaRua] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState<'todos' | 'disponiveis' | 'lotadas'>('todos');
+  const [mostrarDetalhesRua, setMostrarDetalhesRua] = useState(false);
+  const [carregandoRuas, setCarregandoRuas] = useState(true);
+  const [atualizandoRuas, setAtualizandoRuas] = useState(false);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute<any>();
 
   useEffect(() => {
-    if (route.params) {
-      setFormResvaga(route.params.resvaga);
-      setIdVagaAntiga(route.params.resvaga.idVaga || '');
-      if (route.params.resvaga?.data) {
-        const partes = route.params.resvaga.data.split('/');
-        const data = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-        setDataSelecionada(data);
+    const reservaEdicao = route.params?.resvaga;
+
+    if (reservaEdicao) {
+      setFormResvaga(reservaEdicao);
+      setIdVagaAntiga(reservaEdicao.idVaga || '');
+
+      if (reservaEdicao.data) {
+        const partes = reservaEdicao.data.split('/');
+        setDataSelecionada(new Date(`${partes[2]}-${partes[1]}-${partes[0]}`));
       }
-      if (route.params.resvaga?.hora) {
-        const [h, m] = route.params.resvaga.hora.split(':').map(Number);
+
+      if (reservaEdicao.hora) {
+        const [h, m] = reservaEdicao.hora.split(':').map(Number);
         const dt = new Date();
         dt.setHours(h, m, 0, 0);
         setHoraSelecionada(dt);
       }
     }
-    buscarRuasDisponiveis();
   }, [route.params]);
 
-  const buscarRuasDisponiveis = async () => {
-    try {
-      const snapshot = await firestore.collection("Ruas").where("status", "==", "livre").get();
-      const ruasSet = new Set<string>();
-      snapshot.docs.forEach(doc => ruasSet.add(doc.data().rua));
+  useEffect(() => {
+    setCarregandoRuas(true);
+    const unsubscribe = firestore.collection('Ruas').onSnapshot(
+      async (snapshot) => {
+        try {
+          const mapa = new Map<string, RuaCard>();
+          let ruaDaVagaAntiga = '';
 
-      // Se é edição, incluir a rua da vaga antiga
-      if (idVagaAntiga) {
-        const docAntiga = await firestore.collection("Ruas").doc(idVagaAntiga).get();
-        if (docAntiga.exists) {
-          ruasSet.add(docAntiga.data()?.rua);
+          if (idVagaAntiga) {
+            const docAntiga = await firestore.collection('Ruas').doc(idVagaAntiga).get();
+            if (docAntiga.exists) {
+              ruaDaVagaAntiga = docAntiga.data()?.rua || '';
+            }
+          }
+
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const nomeRua = data.rua || 'Rua sem nome';
+
+            if (!mapa.has(nomeRua)) {
+              mapa.set(nomeRua, {
+                nome: nomeRua,
+                total: 0,
+                livres: 0,
+                ocupadas: 0,
+                vagasSelecionaveis: [],
+                possuiVagaSelecionavel: false,
+              });
+            }
+
+            const rua = mapa.get(nomeRua)!;
+            const vaga: VagaOption = {
+              id: doc.id,
+              vaga: data.vaga || '',
+              status: data.status || '',
+            };
+
+            rua.total += 1;
+
+            if (vaga.status === 'livre') {
+              rua.livres += 1;
+              rua.vagasSelecionaveis.push(vaga);
+            } else {
+              rua.ocupadas += 1;
+            }
+
+            if (idVagaAntiga && vaga.id === idVagaAntiga && ruaDaVagaAntiga === nomeRua) {
+              const jaExiste = rua.vagasSelecionaveis.some((item) => item.id === vaga.id);
+              if (!jaExiste) {
+                rua.vagasSelecionaveis.push(vaga);
+              }
+            }
+
+            rua.possuiVagaSelecionavel = rua.vagasSelecionaveis.length > 0;
+          });
+
+          const resumoOrdenado = Array.from(mapa.values())
+            .map((rua) => ({
+              ...rua,
+              vagasSelecionaveis: [...rua.vagasSelecionaveis].sort((a, b) => Number(a.vaga) - Number(b.vaga)),
+              possuiVagaSelecionavel: rua.vagasSelecionaveis.length > 0,
+            }))
+            .sort((a, b) => a.nome.localeCompare(b.nome));
+
+          setRuasResumo(resumoOrdenado);
+
+          if (ruaSelecionada) {
+            const ruaAtual = resumoOrdenado.find((item) => item.nome === ruaSelecionada);
+            setVagasDaRuaSelecionada(ruaAtual?.vagasSelecionaveis || []);
+            setFormResvaga((prev) => ({
+              ...prev,
+              idVaga: prev.idVaga && ruaAtual?.vagasSelecionaveis.some((vaga) => vaga.id === prev.idVaga) ? prev.idVaga : '',
+            }));
+          } else if (ruaDaVagaAntiga) {
+            selecionarRua(ruaDaVagaAntiga, resumoOrdenado, true);
+          }
+        } catch (e) {
+          console.error('Erro ao buscar resumo das ruas:', e);
+        } finally {
+          setCarregandoRuas(false);
+          setAtualizandoRuas(false);
+        }
+      },
+      (error) => {
+        console.error('Erro ao acompanhar ruas em tempo real:', error);
+        setCarregandoRuas(false);
+        setAtualizandoRuas(false);
+      }
+    );
+
+    return unsubscribe;
+  }, [idVagaAntiga, ruaSelecionada]);
+
+  const atualizarLista = async () => {
+    try {
+      setAtualizandoRuas(true);
+      const snapshot = await firestore.collection('Ruas').get();
+      if (!snapshot.empty) {
+        const ruasUnicas = new Set(snapshot.docs.map((doc) => doc.data().rua || 'Rua sem nome'));
+        if (ruasUnicas.size >= 0) {
+          return;
         }
       }
-
-      const ruas = Array.from(ruasSet).map(rua => ({ label: rua, value: rua }));
-      setRuasDisponiveis(ruas);
     } catch (e) {
-      console.error("Erro ao buscar ruas disponíveis:", e);
+      console.error('Erro ao atualizar lista manualmente:', e);
+      alert('Nao foi possivel atualizar a lista.');
+    } finally {
+      setAtualizandoRuas(false);
     }
   };
 
-  const buscarVagasDaRua = async (rua: string) => {
-    try {
-      const snapshot = await firestore.collection("Ruas").where("rua", "==", rua).where("status", "==", "livre").get();
-      let vagas = snapshot.docs.map(doc => ({ id: doc.id, vaga: doc.data().vaga }));
+  const selecionarRua = (nomeRua: string, ruasBase?: RuaCard[], abrirDetalhes = true) => {
+    const origem = ruasBase || ruasResumo;
+    const rua = origem.find((item) => item.nome === nomeRua);
 
-      // Se é edição e a vaga antiga está nesta rua, incluir ela mesmo se ocupada
-      if (idVagaAntiga) {
-        const docAntiga = await firestore.collection("Ruas").doc(idVagaAntiga).get();
-        if (docAntiga.exists && docAntiga.data()?.rua === rua && !vagas.find(v => v.id === idVagaAntiga)) {
-          vagas.push({ id: idVagaAntiga, vaga: docAntiga.data()?.vaga });
-        }
-      }
-
-      setVagasDaRuaSelecionada(vagas);
-    } catch (e) {
-      console.error("Erro ao buscar vagas da rua:", e);
-    }
+    setRuaSelecionada(nomeRua);
+    setVagasDaRuaSelecionada(rua?.vagasSelecionaveis || []);
+    setMostrarDetalhesRua(abrirDetalhes);
+    setFormResvaga((prev) => ({
+      ...prev,
+      idVaga: prev.idVaga && rua?.vagasSelecionaveis.some((vaga) => vaga.id === prev.idVaga) ? prev.idVaga : '',
+    }));
   };
 
   const salvar = async () => {
-    // validação básica: todos os campos devem estar preenchidos
     if (!formResvaga.tipo || !formResvaga.idVaga || !formResvaga.data || !formResvaga.hora) {
       alert('Por favor, preencha todos os campos antes de salvar.');
       return;
@@ -92,9 +197,9 @@ export default function CadastroResvaga() {
 
     try {
       const refResvaga = firestore
-        .collection("Usuario")
+        .collection('Usuario')
         .doc(auth.currentUser?.uid)
-        .collection("Resvaga");
+        .collection('Resvaga');
 
       const novoResvaga = new Resvaga(formResvaga);
 
@@ -102,34 +207,33 @@ export default function CadastroResvaga() {
         const idResvaga = refResvaga.doc(formResvaga.id);
         await idResvaga.update(novoResvaga.toFirestore());
 
-        // Se a vaga mudou, liberar a antiga e ocupar a nova
         if (idVagaAntiga && idVagaAntiga !== formResvaga.idVaga) {
-          await firestore.collection("Ruas").doc(idVagaAntiga).update({ status: "livre" });
-          await firestore.collection("Ruas").doc(formResvaga.idVaga).update({ status: "ocupada" });
+          await firestore.collection('Ruas').doc(idVagaAntiga).update({ status: 'livre' });
+          await firestore.collection('Ruas').doc(formResvaga.idVaga).update({ status: 'ocupada' });
         }
 
         alert('Reserva atualizada com sucesso!');
       } else {
         const idResvaga = refResvaga.doc();
         novoResvaga.id = idResvaga.id;
-        novoResvaga.expiraEm = Date.now() + 30 * 60 * 1000; // 30 minutos
+        novoResvaga.expiraEm = Date.now() + 30 * 60 * 1000;
         await idResvaga.set(novoResvaga.toFirestore());
-
-        // Atualizar status da vaga para ocupada
-        await firestore.collection("Ruas").doc(formResvaga.idVaga).update({ status: "ocupada" });
-
+        await firestore.collection('Ruas').doc(formResvaga.idVaga).update({ status: 'ocupada' });
         alert('Reserva feita com sucesso!');
       }
 
       setFormResvaga({});
       setDataSelecionada(undefined);
+      setHoraSelecionada(undefined);
       setRuaSelecionada('');
       setVagasDaRuaSelecionada([]);
       setIdVagaAntiga('');
-      buscarRuasDisponiveis();
+      setBuscaRua('');
+      setFiltroStatus('todos');
+      setMostrarDetalhesRua(false);
     } catch (e) {
-      console.error("Erro ao salvar reserva:", e);
-      alert("Erro ao salvar reserva!");
+      console.error('Erro ao salvar reserva:', e);
+      alert('Erro ao salvar reserva!');
     }
   };
 
@@ -137,11 +241,10 @@ export default function CadastroResvaga() {
     setShowDatePicker(false);
     if (selectedDate) {
       setDataSelecionada(selectedDate);
-      const dataFormatada = selectedDate.toLocaleDateString('pt-BR');
-      setFormResvaga({
-        ...formResvaga,
-        data: dataFormatada,
-      });
+      setFormResvaga((prev) => ({
+        ...prev,
+        data: selectedDate.toLocaleDateString('pt-BR'),
+      }));
     }
   };
 
@@ -149,124 +252,265 @@ export default function CadastroResvaga() {
     setShowTimePicker(false);
     if (selectedTime) {
       setHoraSelecionada(selectedTime);
-      const horaFormatada = selectedTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      setFormResvaga({
-        ...formResvaga,
-        hora: horaFormatada,
-      });
+      setFormResvaga((prev) => ({
+        ...prev,
+        hora: selectedTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      }));
     }
   };
 
+  const ruasFiltradas = useMemo(() => {
+    return ruasResumo.filter((rua) => {
+      const matchBusca = rua.nome.toLowerCase().includes(buscaRua.toLowerCase());
+
+      if (filtroStatus === 'disponiveis') {
+        return matchBusca && rua.possuiVagaSelecionavel;
+      }
+
+      if (filtroStatus === 'lotadas') {
+        return matchBusca && !rua.possuiVagaSelecionavel;
+      }
+
+      return matchBusca;
+    });
+  }, [buscaRua, filtroStatus, ruasResumo]);
+
+  const reservaCompleta = !!(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora);
+  const ruaAtual = ruasResumo.find((item) => item.nome === ruaSelecionada) || null;
+
+  const renderRuaCard = ({ item }: { item: RuaCard }) => (
+    <Pressable
+      style={({ pressed }) => [
+        styles.reservaStreetCard,
+        pressed && styles.reservaStreetCardPressed,
+      ]}
+      onPress={() => selecionarRua(item.nome)}
+    >
+      <View style={styles.reservaStreetTop}>
+        <View>
+          <Text style={styles.reservaStreetTitle}>Rua {item.nome}</Text>
+          <Text style={styles.reservaStreetMeta}>Total de vagas: {item.total}</Text>
+        </View>
+
+        <View style={[styles.reservaBadge, item.possuiVagaSelecionavel ? styles.reservaBadgeAvailable : styles.reservaBadgeFull]}>
+          <Text style={item.possuiVagaSelecionavel ? styles.reservaBadgeTextAvailable : styles.reservaBadgeTextFull}>
+            {item.possuiVagaSelecionavel ? 'Disponivel' : 'Lotada'}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.reservaStreetCount}>
+        {item.livres > 0 ? `${item.livres} vaga(s) livres` : 'Nenhuma vaga livre'}
+      </Text>
+
+      <View
+        style={[
+          styles.reservaStreetButton,
+          item.possuiVagaSelecionavel ? styles.reservaStreetButtonActive : styles.reservaStreetButtonDisabled,
+        ]}
+      >
+        <Text style={styles.reservaStreetButtonText}>Ver detalhes</Text>
+      </View>
+    </Pressable>
+  );
+
   return (
-    <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
-        <Text style={styles.titulo}>RESERVA DE VAGAS</Text>
+    <KeyboardAvoidingView behavior="padding" style={styles.reservaScreen}>
+      <ImageBackground source={require('../assets/fundo.png')} resizeMode="stretch" style={styles.reservaScreen}>
+        {!mostrarDetalhesRua && (
+          <FlatList
+            data={ruasFiltradas}
+            keyExtractor={(item) => item.nome}
+            renderItem={renderRuaCard}
+            style={styles.reservaList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.reservaScrollContent}
+            ItemSeparatorComponent={() => <View style={styles.reservaListSeparator} />}
+            ListHeaderComponent={
+              <>
+                <View style={styles.reservaHeader}>
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={styles.reservaIconButton}
+                  >
+                    <Ionicons name="arrow-back" size={22} color="#014e40" />
+                  </TouchableOpacity>
 
-        <View style={styles.inputView}>
-          <Text style={styles.labelFormTitle}>Tipo de Vaga</Text>
-          <Picker
-            selectedValue={formResvaga.tipo}
-            onValueChange={valor => setFormResvaga({ ...formResvaga, tipo: valor })}
-            style={styles.pickerContainer}
-          >
-            <Picker.Item label="Selecione..." value="" />
-            <Picker.Item label="Normal" value="normal" />
-            <Picker.Item label="Deficiente" value="deficiente" />
-            <Picker.Item label="Idoso" value="idoso" />
-          </Picker>
+                  <Text style={styles.reservaHeaderTitle}>Vagas disponiveis</Text>
 
-          <Text style={styles.labelFormTitle}>Selecionar Rua</Text>
-          <Picker
-            selectedValue={ruaSelecionada}
-            onValueChange={valor => {
-              setRuaSelecionada(valor);
-              setFormResvaga({ ...formResvaga, idVaga: '' });
-              if (valor) {
-                buscarVagasDaRua(valor);
-              } else {
-                setVagasDaRuaSelecionada([]);
-              }
-            }}
-            style={styles.pickerContainer}
-          >
-            <Picker.Item label="Selecione..." value="" />
-            {ruasDisponiveis.map(rua => (
-              <Picker.Item key={rua.value} label={rua.label} value={rua.value} />
-            ))}
-          </Picker>
+                  <TouchableOpacity onPress={atualizarLista} style={styles.reservaIconButton}>
+                    <Ionicons name="filter" size={20} color="#014e40" />
+                  </TouchableOpacity>
+                </View>
 
-          <Text style={styles.labelFormTitle}>Selecionar Vaga</Text>
-          <Picker
-            selectedValue={formResvaga.idVaga}
-            onValueChange={valor => setFormResvaga({ ...formResvaga, idVaga: valor })}
-            style={styles.pickerContainer}
-            enabled={ruaSelecionada !== ''}
-          >
-            <Picker.Item label="Selecione..." value="" />
-            {vagasDaRuaSelecionada.map(vaga => (
-              <Picker.Item key={vaga.id} label={`Vaga ${vaga.vaga}`} value={vaga.id} />
-            ))}
-          </Picker>
+                <View style={styles.reservaSearchWrapper}>
+                  <Ionicons name="search" size={18} color="#6b7d78" style={styles.reservaSearchIcon} />
+                  <TextInput
+                    mode="flat"
+                    label="Buscar por nome da rua"
+                    value={buscaRua}
+                    onChangeText={setBuscaRua}
+                    style={styles.reservaSearchInput}
+                    activeUnderlineColor="#005A5B"
+                  />
+                </View>
 
-          <Text style={styles.labelFormTitle}>Data da Reserva</Text>
+                <View style={styles.reservaFilterRow}>
+                  {[
+                    { key: 'todos', label: 'Todos' },
+                    { key: 'disponiveis', label: 'Disponiveis' },
+                    { key: 'lotadas', label: 'Lotadas' },
+                  ].map((item) => {
+                    const ativo = filtroStatus === item.key;
+                    return (
+                      <TouchableOpacity
+                        key={item.key}
+                        style={[styles.reservaFilterChip, ativo ? styles.reservaFilterChipActive : styles.reservaFilterChipInactive]}
+                        onPress={() => setFiltroStatus(item.key as 'todos' | 'disponiveis' | 'lotadas')}
+                      >
+                        <Text style={ativo ? styles.reservaFilterChipTextActive : styles.reservaFilterChipTextInactive}>
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
 
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <TextInput
-              label="Data da Reserva"
-              value={formResvaga.data || ''}
-              editable={false}
-              style={styles.input}
-              activeUnderlineColor="#e9ce33ff"
-              right={<TextInput.Icon icon="calendar" />}
-            />
-          </TouchableOpacity>
+                <TouchableOpacity style={styles.reservaRefreshButton} onPress={atualizarLista}>
+                  <Ionicons name="refresh" size={16} color="#014e40" />
+                  <Text style={styles.reservaRefreshButtonText}>
+                    {atualizandoRuas ? 'Atualizando...' : 'Atualizar lista'}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            }
+            ListEmptyComponent={
+              carregandoRuas ? (
+                <View style={styles.reservaLoadingCard}>
+                  <ActivityIndicator size="large" color="#014e40" />
+                  <Text style={styles.reservaLoadingText}>Carregando vagas...</Text>
+                </View>
+              ) : (
+                <View style={styles.reservaEmptyCard}>
+                  <Text style={styles.reservaEmptyTitle}>Nenhuma rua encontrada</Text>
+                  <Text style={styles.reservaEmptyText}>Tente ajustar a busca ou os filtros.</Text>
+                </View>
+              )
+            }
+          />
+        )}
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={dataSelecionada || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-              onChange={onChangeData}
-              minimumDate={new Date()}
-              maximumDate={new Date()}
-            />
-          )}
+        {mostrarDetalhesRua && ruaAtual && (
+          <ScrollView style={styles.reservaList} contentContainerStyle={styles.reservaScrollContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.reservaHeader}>
+            <TouchableOpacity
+              onPress={() => {
+                if (mostrarDetalhesRua) {
+                  setMostrarDetalhesRua(false);
+                  return;
+                }
+                navigation.goBack();
+              }}
+              style={styles.reservaIconButton}
+            >
+              <Ionicons name="arrow-back" size={22} color="#014e40" />
+            </TouchableOpacity>
 
-          <Text style={styles.labelFormTitle}>Hora da Reserva</Text>
+            <Text style={styles.reservaHeaderTitle}>{mostrarDetalhesRua ? 'Detalhes da rua' : 'Vagas disponiveis'}</Text>
 
-          <TouchableOpacity onPress={() => setShowTimePicker(true)}>
-            <TextInput
-              label="Hora da Reserva"
-              value={formResvaga.hora || ''}
-              editable={false}
-              style={styles.input}
-              activeUnderlineColor="#e9ce33ff"
-              right={<TextInput.Icon icon="clock" />}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={atualizarLista} style={styles.reservaIconButton}>
+              <Ionicons name={mostrarDetalhesRua ? 'refresh' : 'filter'} size={20} color="#014e40" />
+            </TouchableOpacity>
+          </View>
+            <View style={styles.reservaFormCard}>
+              <Text style={styles.reservaFormTitle}>Rua {ruaAtual.nome}</Text>
+              <Text style={styles.reservaFormSubtitle}>
+                {ruaAtual.livres} vaga(s) livres de {ruaAtual.total}
+              </Text>
 
-          {showTimePicker && (
-            <DateTimePicker
-              value={horaSelecionada || new Date()}
-              mode="time"
-              display={Platform.OS === 'ios' ? 'spinner' : 'clock'}
-              onChange={onChangeHora}
-            />
-          )}
-        </View>
+              <TouchableOpacity style={styles.reservaRefreshButton} onPress={atualizarLista}>
+                <Ionicons name="refresh" size={16} color="#014e40" />
+                <Text style={styles.reservaRefreshButtonText}>Atualizar lista</Text>
+              </TouchableOpacity>
 
-        <View style={styles.buttonView}>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              !(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora) && { backgroundColor: '#aaa' },
-            ]}
-            onPress={salvar}
-            disabled={!(formResvaga.tipo && formResvaga.idVaga && formResvaga.data && formResvaga.hora)}
-          >
-            <Text style={styles.backButtonText}>Salvar</Text>
-          </TouchableOpacity>
-        </View>
+              <Text style={styles.labelFormTitle}>Tipo de vaga</Text>
+              <Picker
+                selectedValue={formResvaga.tipo}
+                onValueChange={(valor) => setFormResvaga({ ...formResvaga, tipo: valor })}
+                style={styles.pickerContainer}
+              >
+                <Picker.Item label="Selecione..." value="" />
+                <Picker.Item label="Normal" value="normal" />
+                <Picker.Item label="Deficiente" value="deficiente" />
+                <Picker.Item label="Idoso" value="idoso" />
+              </Picker>
+
+              <Text style={styles.labelFormTitle}>Vaga</Text>
+              <Picker
+                selectedValue={formResvaga.idVaga}
+                onValueChange={(valor) => setFormResvaga({ ...formResvaga, idVaga: valor })}
+                style={styles.pickerContainer}
+              >
+                <Picker.Item label="Selecione..." value="" />
+                {vagasDaRuaSelecionada.map((vaga) => (
+                  <Picker.Item key={vaga.id} label={`Vaga ${vaga.vaga}`} value={vaga.id} />
+                ))}
+              </Picker>
+
+              <Text style={styles.labelFormTitle}>Data da reserva</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <TextInput
+                  label="Data da reserva"
+                  value={formResvaga.data || ''}
+                  editable={false}
+                  style={styles.input}
+                  activeUnderlineColor="#005A5B"
+                  right={<TextInput.Icon icon="calendar" />}
+                />
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={dataSelecionada || new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                  onChange={onChangeData}
+                  minimumDate={new Date()}
+                  maximumDate={new Date()}
+                />
+              )}
+
+              <Text style={styles.labelFormTitle}>Hora da reserva</Text>
+              <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+                <TextInput
+                  label="Hora da reserva"
+                  value={formResvaga.hora || ''}
+                  editable={false}
+                  style={styles.input}
+                  activeUnderlineColor="#005A5B"
+                  right={<TextInput.Icon icon="clock" />}
+                />
+              </TouchableOpacity>
+
+              {showTimePicker && (
+                <DateTimePicker
+                  value={horaSelecionada || new Date()}
+                  mode="time"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'clock'}
+                  onChange={onChangeHora}
+                />
+              )}
+
+              <TouchableOpacity
+                style={[styles.button, !reservaCompleta && styles.reservaSubmitDisabled]}
+                onPress={salvar}
+                disabled={!reservaCompleta}
+              >
+                <Text style={styles.buttonText}>Salvar reserva</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        )}
       </ImageBackground>
     </KeyboardAvoidingView>
   );

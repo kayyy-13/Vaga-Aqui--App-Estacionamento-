@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { firestore } from '../firebase';
-import { Rua } from '../model/Rua';
 import { Resvaga } from '../model/Resvaga';
 import styles from '../estilo';
 
@@ -13,41 +12,50 @@ export default function Admin() {
   const [reservasDia, setReservasDia] = useState(0);
 
   useEffect(() => {
-    buscarDados();
+    const unsubscribeRuas = firestore.collection('Ruas').onSnapshot(
+      (snapshot) => {
+        const total = snapshot.size;
+
+        setTotalVagas(total);
+      },
+      (error) => {
+        console.error('Erro ao buscar vagas:', error);
+      }
+    );
+
+    const unsubscribeReservas = firestore.collectionGroup('Resvaga').onSnapshot(
+      (snapshot) => {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        let ocupadas = 0;
+        let dia = 0;
+
+        snapshot.forEach((doc) => {
+          const res = new Resvaga(doc.data());
+          const statusReserva = res.statusReserva || 'ativa';
+          const reservaAtiva = statusReserva === 'ativa' && res.expiraEm > Date.now();
+
+          if (reservaAtiva) {
+            ocupadas++;
+          }
+
+          if (res.data === hoje && reservaAtiva) {
+            dia++;
+          }
+        });
+
+        setVagasOcupadas(ocupadas);
+        setReservasDia(dia);
+      },
+      (error) => {
+        console.error('Erro ao buscar reservas:', error);
+      }
+    );
+
+    return () => {
+      unsubscribeRuas();
+      unsubscribeReservas();
+    };
   }, []);
-
-  const buscarDados = async () => {
-    try {
-      // Buscar ruas
-      const ruasSnap = await firestore.collection('Ruas').get();
-      let total = 0;
-      ruasSnap.forEach(doc => {
-        const rua = new Rua(doc.data());
-        total += parseInt(rua.vaga) || 0;
-      });
-      setTotalVagas(total);
-
-      // Buscar todas as reservas
-      const reservasSnap = await firestore.collectionGroup('Resvaga').get();
-      const hoje = new Date().toLocaleDateString('pt-BR');
-      let ocupadas = 0;
-      let dia = 0;
-
-      reservasSnap.forEach(doc => {
-        const res = new Resvaga(doc.data());
-        if (res.expiraEm > Date.now()) {
-          ocupadas++;
-        }
-        if (res.data === hoje) {
-          dia++;
-        }
-      });
-      setVagasOcupadas(ocupadas);
-      setReservasDia(dia);
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-    }
-  };
 
   return (
     <View style={styles.container}>

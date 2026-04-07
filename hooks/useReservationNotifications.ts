@@ -19,19 +19,19 @@ export const useReservationNotifications = () => {
       for (const doc of snapshot.docs) {
         const reserva = doc.data();
         
-        // Se a reserva expirou, cancelar automaticamente a vaga!!
-        if (reserva.expiraEm && reserva.expiraEm < agora) {
+        // Se a reserva expirou, finaliza automaticamente a reserva e libera a vaga
+        if (reserva.expiraEm && reserva.expiraEm < agora && reserva.statusReserva !== 'cancelada' && reserva.statusReserva !== 'expirada') {
           try {
-            // Liberar a vaga
             await firestore
               .collection("Ruas")
               .doc(reserva.idVaga)
               .update({ status: "livre" });
 
-            // Deletar a reserva
-            await doc.ref.delete();
+            await doc.ref.update({
+              statusReserva: 'expirada',
+              finalizadaEm: agora,
+            });
 
-            // Notificar o usuário que a reserva foi cancelada
             Alert.alert(
               '❌ Reserva Cancelada',
               `Sua reserva expirou após 30 minutos sem ocupação. A vaga foi liberada.`,
@@ -68,7 +68,7 @@ export const useReservationNotifications = () => {
         const reserva = doc.data();
         
         // Se a reserva expira em menos de 5 minutos, notificar apenas uma vez
-        if (reserva.expiraEm) {
+        if (reserva.expiraEm && reserva.statusReserva !== 'cancelada' && reserva.statusReserva !== 'expirada') {
           const tempoRestante = reserva.expiraEm - agora;
           
           // Notificar se faltam menos de 5 minutos e ainda não foi notificado

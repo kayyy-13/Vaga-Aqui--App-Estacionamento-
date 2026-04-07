@@ -74,6 +74,10 @@ export default function ReservaListar2() {
                     const agora = Date.now();
                     let status: 'Ativa' | 'Finalizada' = 'Finalizada';
 
+                    if (dadosReserva?.statusReserva === 'cancelada' || dadosReserva?.statusReserva === 'expirada') {
+                        status = 'Finalizada';
+                    } else
+
                     if (dadosReserva?.expiraEm != null) {
                         status = dadosReserva.expiraEm > agora ? 'Ativa' : 'Finalizada';
                     } else if (dadosReserva?.data && dadosReserva?.hora) {
@@ -153,7 +157,10 @@ export default function ReservaListar2() {
                                 .doc(item.idUsuario)
                                 .collection('Resvaga')
                                 .doc(item.id)
-                                .delete();
+                                .update({
+                                    statusReserva: 'cancelada',
+                                    finalizadaEm: Date.now(),
+                                });
 
                             if (item.idVaga) {
                                 await firestore.collection('Ruas').doc(item.idVaga).update({ status: 'livre' });
