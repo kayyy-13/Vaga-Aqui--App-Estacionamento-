@@ -7,7 +7,7 @@ import { Resvaga } from '../model/Resvaga';
 import styles from '../estilo';
 
 export default function Admin() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [totalVagas, setTotalVagas] = useState(0);
   const [vagasOcupadas, setVagasOcupadas] = useState(0);
   const [reservasDia, setReservasDia] = useState(0);
@@ -63,7 +63,7 @@ export default function Admin() {
           <Text style={styles.metricValue}>{vagasOcupadas}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricTitle}>� Reservas do Dia</Text>
+          <Text style={styles.metricTitle}>Reservas do Dia</Text>
           <Text style={styles.metricValue}>{reservasDia}</Text>
         </View>
       </View>

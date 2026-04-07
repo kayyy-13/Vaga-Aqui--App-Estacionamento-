@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, Button, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,7 @@ export default function AdminLogin() {
   const[email, setEmail] = useState('')
   const[senha, setSenha] = useState('')
 
-  const navigation = useNavigation()
+  const navigation = useNavigation<any>()
 
   const logarAdmin = async () => {
     try {
@@ -26,8 +26,8 @@ export default function AdminLogin() {
         alert('Você não tem permissão para acessar como administrador.');
         await auth.signOut();
       }
-    } catch (erro) {
-      alert(erro.message);
+    } catch (erro: any) {
+      alert(erro?.message || 'Nao foi possivel realizar o login de administrador.');
     }
   }
 

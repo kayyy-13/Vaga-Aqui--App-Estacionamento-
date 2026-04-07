@@ -45,9 +45,8 @@ export default function UserManagement() {
               await firestore.collection('Usuario').doc(usuario.id).update({
                 bloqueado: novoStatus,
               });
-              // Atualizar localmente
               setUsuarios(prev =>
-                prev.map(u => u.id === usuario.id ? { ...u, bloqueado: novoStatus } : u)
+                prev.map(u => (u.id === usuario.id ? new Usuario({ ...u, bloqueado: novoStatus }) : u))
               );
               Alert.alert('Sucesso', `Usuário ${mensagem}do com sucesso.`);
             } catch (error) {

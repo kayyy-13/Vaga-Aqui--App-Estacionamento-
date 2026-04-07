@@ -1,5 +1,3 @@
-import { Text, View } from 'react-native';
-
 import Login       from './screens/Login';
 import AdminLogin  from './screens/AdminLogin';
 import Register    from './screens/Register';
@@ -19,7 +17,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator id={undefined}>
         <Stack.Screen name='Login'       component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='AdminLogin'  component={AdminLogin} options={{ headerShown: false }} />
         <Stack.Screen name='Register'    component={Register} options={{ headerShown: false }}/>

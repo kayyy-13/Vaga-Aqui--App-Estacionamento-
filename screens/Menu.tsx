@@ -9,7 +9,6 @@ import Admin from './Admin';
 import UserManagement from './UserManagement';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons as Icon } from '@expo/vector-icons';
 
 import { Usuario } from "../model/Usuario";
@@ -18,15 +17,6 @@ import { useEffect, useState } from "react";
 import { useReservationNotifications } from "../hooks/useReservationNotifications";
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
-
-function TabNavigator({ usuario }: { usuario: Usuario | null }) {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }} id={undefined}>
-            <Stack.Screen name="MainTabs" component={() => <TabNavigator usuario={usuario} />} />
-        </Stack.Navigator>
-    );
-}
 
 export default function Menu() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);

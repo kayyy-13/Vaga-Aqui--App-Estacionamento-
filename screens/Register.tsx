@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, Button, TouchableOpacity, ImageBackground} from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 export default function Register() {
   const[formUsuario, setFormUsuario] = useState<Partial<Usuario>>({})
 
-  const navigation = useNavigation()
+  const navigation = useNavigation<any>()
 
   const normal = () => {
     setFormUsuario({
@@ -43,7 +43,7 @@ export default function Register() {
 
       navigation.replace('Menu')
     })
-    .catch(erro => alert(erro.message))
+    .catch((erro: any) => alert(erro?.message || 'Nao foi possivel concluir o cadastro.'))
   }
 
   

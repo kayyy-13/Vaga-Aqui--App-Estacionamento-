@@ -11,8 +11,8 @@ export default function CadastroRua() {
   const[formRua, setFormRua] = useState<Partial<Rua>>({})
   const [tipoUsuario, setTipoUsuario] = useState<string>('');
 
-  const route = useRoute();         // Cria a rota para receber o raca no editar
-  const navigation = useNavigation();
+  const route = useRoute<any>();         // Cria a rota para receber o raca no editar
+  const navigation = useNavigation<any>();
 
   useEffect( () => {                // Recebe o objeto tipo para editar
     if (route.params) {
@@ -54,7 +54,7 @@ export default function CadastroRua() {
           alert('Erro ao atualizar rua.');
         });
     } else {
-      const quantidade = parseInt(formRua.vaga);
+      const quantidade = parseInt(formRua.vaga || '0', 10);
       if (!formRua.rua?.trim()) {
         alert('Informe o nome da rua.');
         return;

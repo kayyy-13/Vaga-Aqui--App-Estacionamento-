@@ -1,6 +1,5 @@
-import { ImageBackground, KeyboardAvoidingView, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, KeyboardAvoidingView, Text } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
 import styles from '../estilo';
 
 import { Usuario } from "../model/Usuario";
@@ -13,19 +12,6 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [usuario, setUsuario] = useState<Usuario | null>(null); // Estado para armazenar dados do usuário logado
 
-  const navigation = useNavigation();
-
-  /**
-   * Faz logout do usuário e redireciona para a tela de login.
-   */
-  const logout = () => {
-    auth
-      .signOut()
-      .then(() => {
-        navigation.replace('Login');
-      });
-  };
-
   useEffect(() => {
     listarUsuario(); // Carrega dados do usuário ao montar o componente
   }, []);
@@ -34,7 +20,7 @@ export default function Home() {
    * Busca os dados do usuário logado no Firestore.
    */
   const listarUsuario = () => {
-    const refUsuario = firestore.collection("Usuario")
+    firestore.collection("Usuario")
       .doc(auth.currentUser?.uid)
       .get()
       .then((documentSnapshot) => {
@@ -62,4 +48,3 @@ export default function Home() {
     </KeyboardAvoidingView>
   );
 }
-

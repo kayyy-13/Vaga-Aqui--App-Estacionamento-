@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
@@ -13,7 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState(''); // Estado para email do usuário
   const [senha, setSenha] = useState(''); // Estado para senha do usuário
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   /**
    * Verifica reservas e mostra notificações se necessário
@@ -106,8 +106,8 @@ export default function Login() {
         alert('Esta é a tela de login para usuários normais. Use a tela de administrador se aplicável.');
         await auth.signOut();
       }
-    } catch (erro) {
-      alert(erro.message);
+    } catch (erro: any) {
+      alert(erro?.message || 'Nao foi possivel realizar o login.');
     }
   };
 
