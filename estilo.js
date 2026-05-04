@@ -99,6 +99,23 @@ export default StyleSheet.create({
   buttonFlex: {
     flex: 1,
   },
+  // Botões padronizados do app
+  botao: {
+    backgroundColor: colors.accent2,
+    width: '85%',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
+  textoBotao: {
+    color: colors.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
   // filtros de admin
   filterContainer: {
     flexDirection: 'row',
@@ -480,6 +497,7 @@ export default StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
+  
   },
   reservaStreetTop: {
     flexDirection: 'row',

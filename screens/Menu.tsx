@@ -7,6 +7,9 @@ import ReservaListar2   from "./ReservaListar2";
 import Profile from './Profile';
 import Admin from './Admin';
 import UserManagement from './UserManagement';
+import Suporte from './Suporte';
+import Denuncias from './Denuncias';
+import MinhasDenuncias from './MinhasDenuncias';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -75,11 +78,35 @@ export default function Menu() {
                     options={{ tabBarIcon: ({ color, size }) => <Icon name="person" size={size} color={color} /> }}
                 />
 
+                {usuario?.tipo !== '2' && (
+                    <Tab.Screen
+                        name='Suporte'
+                        component={Suporte}
+                        options={{ tabBarIcon: ({ color, size }) => <Icon name="help-circle" size={size} color={color} /> }}
+                    />
+                )}
+
+                {usuario?.tipo !== '2' && (
+                    <Tab.Screen
+                        name='Minhas Denúncias'
+                        component={MinhasDenuncias}
+                        options={{ tabBarIcon: ({ color, size }) => <Icon name="document-text" size={size} color={color} /> }}
+                    />
+                )}
+
                 {usuario?.tipo === '2' && (
                     <Tab.Screen
                         name='Admin'
                         component={Admin}
                         options={{ tabBarIcon: ({ color, size }) => <Icon name="lock-closed" size={size} color={color} /> }}
+                    />
+                )}
+
+                {usuario?.tipo === '2' && (
+                    <Tab.Screen
+                        name='Denúncias'
+                        component={Denuncias}
+                        options={{ tabBarIcon: ({ color, size }) => <Icon name="alert-circle" size={size} color={color} /> }}
                     />
                 )}
 
