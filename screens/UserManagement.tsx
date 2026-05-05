@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { firestore } from '../firebase';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 import { Usuario } from '../model/Usuario';
 
 export default function UserManagement() {
@@ -60,7 +60,7 @@ export default function UserManagement() {
   };
 
   const renderUsuario = ({ item }: { item: Usuario }) => (
-    <View style={styles.listItem}>
+    <View style={[styles.listItem, styles.lightCard]}>
       <Text style={styles.listText}>Nome: {item.nome}</Text>
       <Text style={styles.listText}>Email: {item.email}</Text>
       <Text style={styles.listText}>Telefone: {item.fone}</Text>
@@ -70,7 +70,7 @@ export default function UserManagement() {
       </Text>
 
       <TouchableOpacity
-        style={[styles.button, { marginTop: 10, backgroundColor: item.bloqueado ? '#4CAF50' : '#d32f2f' }]}
+        style={[styles.button, { marginTop: 10, backgroundColor: item.bloqueado ? themeColors.accent2 : themeColors.danger }]}
         onPress={() => toggleBloqueio(item)}
       >
         <Text style={styles.buttonText}>

@@ -407,7 +407,7 @@ export default function Profile() {
             renderItem={({ item }) => {
               const expired = isExpired(item);
               return (
-                <View style={styles.listItem}>
+                <View style={[styles.listItem, styles.lightCard]}>
                   <Text style={styles.listText}>Data: {item.data}</Text>
                   <Text style={styles.listText}>Hora: {item.hora}</Text>
                   <Text style={styles.listText}>Tipo: {item.tipo}</Text>
@@ -448,7 +448,7 @@ export default function Profile() {
               );
             }}
             ListEmptyComponent={<Text style={styles.text}>Nenhuma reserva encontrada nesta aba.</Text>}
-            contentContainerStyle={{ paddingBottom: 30 }}
+            contentContainerStyle={styles.flatlistContentContainer}
           />
         )}
       </View>

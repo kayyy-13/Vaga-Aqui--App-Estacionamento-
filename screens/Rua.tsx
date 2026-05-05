@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Text, View, KeyboardAvoidingView, TouchableOpacity, FlatList } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 import { Rua } from '../model/Rua';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -255,14 +255,14 @@ export default function CadastroRua() {
             label='Nome da rua'
             onChangeText={valor => setFormRua({ ...formRua, rua: valor })}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor={themeColors.accent1}
             value={formRua.rua}
           />
           <TextInput
             label='Número de vagas'
             onChangeText={valor => setFormRua({ ...formRua, vaga: valor })}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor={themeColors.accent1}
             value={formRua.vaga}
             keyboardType='numeric'
           />
@@ -293,7 +293,7 @@ export default function CadastroRua() {
               contentContainerStyle={styles.flatlistContentContainer}
               ListEmptyComponent={<Text style={styles.listText}>Nenhuma rua cadastrada.</Text>}
               renderItem={({ item }) => (
-                <View style={styles.listItem}>
+                <View style={[styles.listItem, styles.lightCard]}>
                   <Text style={styles.listText}>Rua: {item.nome}</Text>
                   <Text style={styles.listText}>Vagas: {item.totalVagas}</Text>
                   <Text style={styles.listText}>Livres: {item.vagasLivres}</Text>

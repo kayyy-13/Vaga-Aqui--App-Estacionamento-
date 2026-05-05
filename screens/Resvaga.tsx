@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Platform, ScrollView, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, Platform, ScrollView, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -316,7 +316,7 @@ export default function CadastroResvaga() {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.reservaScreen}>
-      <ImageBackground source={require('../assets/fundo.png')} resizeMode="stretch" style={styles.reservaScreen}>
+      <View style={styles.reservaScreen}>
         {!mostrarDetalhesRua && (
           <FlatList
             data={ruasFiltradas}
@@ -333,25 +333,25 @@ export default function CadastroResvaga() {
                     onPress={() => navigation.goBack()}
                     style={styles.reservaIconButton}
                   >
-                    <Ionicons name="arrow-back" size={22} color="#014e40" />
+                    <Ionicons name="arrow-back" size={22} color={themeColors.secondary} />
                   </TouchableOpacity>
 
                   <Text style={styles.reservaHeaderTitle}>Vagas disponiveis</Text>
 
                   <TouchableOpacity onPress={atualizarLista} style={styles.reservaIconButton}>
-                    <Ionicons name="filter" size={20} color="#014e40" />
+                    <Ionicons name="filter" size={20} color={themeColors.secondary} />
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.reservaSearchWrapper}>
-                  <Ionicons name="search" size={18} color="#6b7d78" style={styles.reservaSearchIcon} />
+                  <Ionicons name="search" size={18} color={themeColors.textSecondary} style={styles.reservaSearchIcon} />
                   <TextInput
                     mode="flat"
                     label="Buscar por nome da rua"
                     value={buscaRua}
                     onChangeText={setBuscaRua}
                     style={styles.reservaSearchInput}
-                    activeUnderlineColor="#005A5B"
+                    activeUnderlineColor={themeColors.accent1}
                   />
                 </View>
 
@@ -377,7 +377,7 @@ export default function CadastroResvaga() {
                 </View>
 
                 <TouchableOpacity style={styles.reservaRefreshButton} onPress={atualizarLista}>
-                  <Ionicons name="refresh" size={16} color="#014e40" />
+                  <Ionicons name="refresh" size={16} color={themeColors.secondary} />
                   <Text style={styles.reservaRefreshButtonText}>
                     {atualizandoRuas ? 'Atualizando...' : 'Atualizar lista'}
                   </Text>
@@ -387,7 +387,7 @@ export default function CadastroResvaga() {
             ListEmptyComponent={
               carregandoRuas ? (
                 <View style={styles.reservaLoadingCard}>
-                  <ActivityIndicator size="large" color="#014e40" />
+                  <ActivityIndicator size="large" color={themeColors.secondary} />
                   <Text style={styles.reservaLoadingText}>Carregando vagas...</Text>
                 </View>
               ) : (
@@ -413,13 +413,13 @@ export default function CadastroResvaga() {
               }}
               style={styles.reservaIconButton}
             >
-              <Ionicons name="arrow-back" size={22} color="#014e40" />
+              <Ionicons name="arrow-back" size={22} color={themeColors.secondary} />
             </TouchableOpacity>
 
             <Text style={styles.reservaHeaderTitle}>{mostrarDetalhesRua ? 'Detalhes da rua' : 'Vagas disponiveis'}</Text>
 
             <TouchableOpacity onPress={atualizarLista} style={styles.reservaIconButton}>
-              <Ionicons name={mostrarDetalhesRua ? 'refresh' : 'filter'} size={20} color="#014e40" />
+              <Ionicons name={mostrarDetalhesRua ? 'refresh' : 'filter'} size={20} color={themeColors.secondary} />
             </TouchableOpacity>
           </View>
             <View style={styles.reservaFormCard}>
@@ -429,15 +429,14 @@ export default function CadastroResvaga() {
               </Text>
 
               <TouchableOpacity style={styles.reservaRefreshButton} onPress={atualizarLista}>
-                <Ionicons name="refresh" size={16} color="#014e40" />
-                <Text style={styles.reservaRefreshButtonText}>Atualizar lista</Text>
+                  <Ionicons name="refresh" size={16} color={themeColors.secondary} />
               </TouchableOpacity>
 
               <Text style={styles.labelFormTitle}>Tipo de vaga</Text>
               <Picker
                 selectedValue={formResvaga.tipo}
                 onValueChange={(valor) => setFormResvaga({ ...formResvaga, tipo: valor })}
-                style={styles.pickerContainer}
+                style={styles.whitePickerContainer}
               >
                 <Picker.Item label="Selecione..." value="" />
                 <Picker.Item label="Normal" value="normal" />
@@ -449,7 +448,7 @@ export default function CadastroResvaga() {
               <Picker
                 selectedValue={formResvaga.idVaga}
                 onValueChange={(valor) => setFormResvaga({ ...formResvaga, idVaga: valor })}
-                style={styles.pickerContainer}
+                style={styles.whitePickerContainer}
               >
                 <Picker.Item label="Selecione..." value="" />
                 {vagasDaRuaSelecionada.map((vaga) => (
@@ -464,7 +463,7 @@ export default function CadastroResvaga() {
                   value={formResvaga.data || ''}
                   editable={false}
                   style={styles.input}
-                  activeUnderlineColor="#005A5B"
+                  activeUnderlineColor={themeColors.accent1}
                   right={<TextInput.Icon icon="calendar" />}
                 />
               </TouchableOpacity>
@@ -487,7 +486,7 @@ export default function CadastroResvaga() {
                   value={formResvaga.hora || ''}
                   editable={false}
                   style={styles.input}
-                  activeUnderlineColor="#005A5B"
+                  activeUnderlineColor={themeColors.accent1}
                   right={<TextInput.Icon icon="clock" />}
                 />
               </TouchableOpacity>
@@ -511,7 +510,7 @@ export default function CadastroResvaga() {
             </View>
           </ScrollView>
         )}
-      </ImageBackground>
+      </View>
     </KeyboardAvoidingView>
   );
 }

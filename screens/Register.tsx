@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground} from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 import { Usuario } from '../model/Usuario';
 import { Picker } from '@react-native-picker/picker';
@@ -49,7 +49,7 @@ export default function Register() {
   
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.container}>
+      <View style={styles.container}>
         <Text style={styles.titulo}>CADASTRO DE USUÁRIOS</Text>
 
         <View style={styles.inputView}>
@@ -60,7 +60,7 @@ export default function Register() {
               nome : valor
             })}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor={themeColors.accent1}
           />
           <TextInput 
             label='Email' 
@@ -69,7 +69,7 @@ export default function Register() {
               email : valor
             })}
             style={styles.input}  
-            activeUnderlineColor='#e9ce33ff'    
+            activeUnderlineColor={themeColors.accent1}    
           />
           <TextInput 
             label='Senha' 
@@ -79,7 +79,7 @@ export default function Register() {
             })}
             secureTextEntry={true}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor={themeColors.accent1}
           />
           <TextInput 
             label='Fone' 
@@ -88,7 +88,7 @@ export default function Register() {
               fone : valor
             })}
             style={styles.input}
-            activeUnderlineColor='#e9ce33ff'
+            activeUnderlineColor={themeColors.accent1}
           />
          <Text style={styles.labelFormTitle}>PCD</Text>
           <Picker
@@ -116,7 +116,7 @@ export default function Register() {
           </TouchableOpacity>
         </View>
 
-      </ImageBackground>
+      </View>
     </KeyboardAvoidingView>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { firestore } from '../firebase';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 type ReservaAdmin = {
     id: string;
@@ -179,7 +179,7 @@ export default function ReservaListar2() {
     };
 
     return (
-        <ImageBackground source={require('../assets/fundo.png')} resizeMode="stretch" style={styles.container}>
+        <View style={styles.container}>
             <Text style={styles.titulo}>Reservas do App</Text>
 
             <View style={styles.filterContainer}>
@@ -220,7 +220,7 @@ export default function ReservaListar2() {
                     contentContainerStyle={styles.flatlistContentContainer}
                     ListEmptyComponent={<Text style={styles.listText}>Nenhuma reserva encontrada.</Text>}
                     renderItem={({ item }) => (
-                        <View style={styles.listItem}>
+                        <View style={[styles.listItem, styles.lightCard]}>
                             <Text style={styles.listText}>Usuário: {item.nomeUsuario}</Text>
                             <Text style={styles.listText}>
                                 Rua:{' '}
@@ -234,7 +234,7 @@ export default function ReservaListar2() {
                             </Text>
 
                             <TouchableOpacity
-                                style={[styles.button, { marginTop: 10, backgroundColor: '#d32f2f' }]}
+                                style={[styles.button, { marginTop: 10, backgroundColor: themeColors.danger }]}
                                 onPress={() => cancelarReserva(item)}
                             >
                                 <Text style={styles.buttonText}>Cancelar Reserva</Text>
@@ -243,6 +243,6 @@ export default function ReservaListar2() {
                     )}
                 />
             )}
-        </ImageBackground>
+        </View>
     );
 }

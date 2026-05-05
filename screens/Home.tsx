@@ -1,4 +1,4 @@
-import { ImageBackground, KeyboardAvoidingView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Text, View } from 'react-native';
 import { auth, firestore } from '../firebase';
 import styles from '../estilo';
 
@@ -112,54 +112,52 @@ export default function Home() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.homeScreen}>
-      <ImageBackground source={require('../assets/fundo.png')} resizeMode='stretch' style={styles.homeScreen}>
-        <View style={styles.homeContent}>
-          {usuario?.tipo === '2' ? (
-            <>
-              <Text style={styles.homeGreeting}>Ola, {usuario?.nome || 'administrador'} 👋</Text>
-              <Text style={styles.homeSubtitle}>Painel rapido do sistema</Text>
+      <View style={styles.homeContent}>
+        {usuario?.tipo === '2' ? (
+          <>
+            <Text style={styles.homeGreeting}>Ola, {usuario?.nome || 'administrador'} 👋</Text>
+            <Text style={styles.homeSubtitle}>Painel rapido do sistema</Text>
 
-              <View style={styles.homeAdminGrid}>
-                <View style={styles.homeAdminCard}>
-                  <Text style={styles.homeAdminLabel}>Total de vagas</Text>
-                  <Text style={styles.homeAdminValue}>{adminResumo.totalVagas}</Text>
-                </View>
-
-                <View style={styles.homeAdminCard}>
-                  <Text style={styles.homeAdminLabel}>Vagas livres</Text>
-                  <Text style={styles.homeAdminValue}>{adminResumo.vagasLivres}</Text>
-                </View>
-
-                <View style={styles.homeAdminCardWide}>
-                  <Text style={styles.homeAdminLabel}>Reservas ativas</Text>
-                  <Text style={styles.homeAdminValue}>{adminResumo.reservasAtivas}</Text>
-                </View>
+            <View style={styles.homeAdminGrid}>
+              <View style={styles.homeAdminCard}>
+                <Text style={styles.homeAdminLabel}>Total de vagas</Text>
+                <Text style={styles.homeAdminValue}>{adminResumo.totalVagas}</Text>
               </View>
 
-              <Text style={styles.homeAdminHint}>Acompanhe o fluxo do estacionamento em tempo real.</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.homeGreeting}>Ola, {usuario?.nome || 'usuario'} 👋</Text>
-              <Text style={styles.homeSubtitle}>Confira rapidamente como estao as vagas:</Text>
-
-              <View style={styles.homeMiniList}>
-                {ruasResumo.length === 0 ? (
-                  <Text style={styles.homeMiniListText}>Nenhuma rua cadastrada no momento.</Text>
-                ) : (
-                  ruasResumo.map((rua) => (
-                    <View key={rua.nome} style={styles.homeMiniListItem}>
-                      <Text style={styles.homeMiniListText}>
-                        {`📍 ${rua.nome} - ${rua.livres > 0 ? `${rua.livres} vagas livres` : 'Lotado'}`}
-                      </Text>
-                    </View>
-                  ))
-                )}
+              <View style={styles.homeAdminCard}>
+                <Text style={styles.homeAdminLabel}>Vagas livres</Text>
+                <Text style={styles.homeAdminValue}>{adminResumo.vagasLivres}</Text>
               </View>
-            </>
-          )}
-        </View>
-      </ImageBackground>
+
+              <View style={styles.homeAdminCardWide}>
+                <Text style={styles.homeAdminLabel}>Reservas ativas</Text>
+                <Text style={styles.homeAdminValue}>{adminResumo.reservasAtivas}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.homeAdminHint}>Acompanhe o fluxo do estacionamento em tempo real.</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.homeGreeting}>Ola, {usuario?.nome || 'usuario'} 👋</Text>
+            <Text style={styles.homeSubtitle}>Confira rapidamente como estao as vagas:</Text>
+
+            <View style={styles.homeMiniList}>
+              {ruasResumo.length === 0 ? (
+                <Text style={styles.homeMiniListText}>Nenhuma rua cadastrada no momento.</Text>
+              ) : (
+                ruasResumo.map((rua) => (
+                  <View key={rua.nome} style={styles.homeMiniListItem}>
+                    <Text style={styles.homeMiniListText}>
+                      {`📍 ${rua.nome} - ${rua.livres > 0 ? `${rua.livres} vagas livres` : 'Lotado'}`}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </View>
+          </>
+        )}
+      </View>
     </KeyboardAvoidingView>
   );
 }

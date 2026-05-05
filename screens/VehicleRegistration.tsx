@@ -106,7 +106,7 @@ export default function VehicleRegistration() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.titulo}>🚗 Cadastro de Veículo</Text>
 
         <View style={styles.inputView}>

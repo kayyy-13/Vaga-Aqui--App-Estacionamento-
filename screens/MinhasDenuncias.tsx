@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { firestore, auth } from '../firebase';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 import { Suporte } from '../model/Suporte';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -99,15 +99,15 @@ export default function MinhasDenuncias() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'aberto':
-        return '#ffc107'; // 🟡
+        return themeColors.warning; // 🟡
       case 'em análise':
-        return '#007bff'; // 🔵
+        return themeColors.secondary; // 🔵
       case 'resolvido':
-        return '#28a745'; // 🟢
+        return themeColors.success; // 🟢
       case 'fechado':
-        return '#6c757d'; // ⚪
+        return themeColors.disabled; // ⚪
       default:
-        return '#6c757d';
+        return themeColors.disabled;
     }
   };
 
@@ -156,120 +156,48 @@ export default function MinhasDenuncias() {
   };
 
   const renderCard = ({ item }: { item: Suporte }) => (
-    <View
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        marginBottom: 16,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        borderLeftWidth: 4,
-        borderLeftColor: getStatusColor(item.status),
-      }}
-    >
-      {/* Header com tipo e data */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 12,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+    <View style={[styles.card, { borderLeftColor: getStatusColor(item.status) }]}> 
+      <View style={styles.cardHeader}>
+        <View style={styles.cardHeaderInfo}>
+          <Text style={styles.cardTitle}>
             📝 {getTipoEmoji(item.tipo)} {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
           </Text>
-          <Text style={{ fontSize: 12, color: '#666' }}>
+          <Text style={styles.cardSubtitle}>
             📅 {formatarData(item.data)}
           </Text>
         </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text
-            style={{
-              fontSize: 12,
-              color: '#fff',
-              backgroundColor: getStatusColor(item.status),
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 12,
-              fontWeight: 'bold',
-              marginBottom: 4,
-            }}
-          >
-            {getStatusEmoji(item.status)} {item.status}
-          </Text>
+        <View style={styles.cardHeaderRight}>
+          <View style={[styles.badge, { backgroundColor: getStatusColor(item.status) }]}> 
+            <Text style={styles.badgeText}>
+              {getStatusEmoji(item.status)} {item.status}
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Descrição */}
-      <View style={{ marginBottom: 16 }}>
-        <Text
-          style={{
-            fontSize: 14,
-            color: '#444',
-            lineHeight: 20,
-          }}
-          numberOfLines={3}
-        >
+      <View style={styles.cardSection}>
+        <Text style={styles.cardText} numberOfLines={3}>
           📍 {item.descricao}
         </Text>
       </View>
 
-      {/* Status detalhado */}
-      <View
-        style={{
-          backgroundColor: '#f8f9fa',
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 16,
-        }}
-      >
-        <Text style={{ color: '#333', fontSize: 14, fontWeight: '600', marginBottom: 4 }}>
-          📊 Status Atual
-        </Text>
-        <Text style={{ color: '#555', fontSize: 13, lineHeight: 18 }}>
-          {getStatusTexto(item.status)}
-        </Text>
+      <View style={[styles.cardSection, { marginBottom: 0 }]}> 
+        <Text style={styles.cardSectionLabel}>Status Atual</Text>
+        <Text style={styles.cardText}>{getStatusTexto(item.status)}</Text>
       </View>
 
-      {/* Botão Detalhar */}
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#007AFF',
-          borderRadius: 8,
-          paddingVertical: 10,
-          alignItems: 'center',
-          flexDirection: 'row',
-          justifyContent: 'center',
-        }}
-        onPress={() => abrirDetalhes(item)}
-      >
+      <TouchableOpacity style={[styles.button, styles.cardButton]} onPress={() => abrirDetalhes(item)}>
         <Ionicons name="chatbubble-ellipses" size={16} color="#fff" />
-        <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 6 }}>
-          Ver Conversa
-        </Text>
+        <Text style={[styles.buttonText, { marginLeft: 6 }]}>Ver Conversa</Text>
       </TouchableOpacity>
     </View>
   );
 
   if (carregando) {
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 16, color: '#666' }}>
+      <View style={[styles.container, styles.centeredContainer]}>
+        <ActivityIndicator size="large" color={themeColors.secondary} />
+        <Text style={styles.textHelper}>
           Carregando suas denúncias...
         </Text>
       </View>
@@ -277,24 +205,18 @@ export default function MinhasDenuncias() {
   }
 
   return (
-    <View style={[styles.container, { paddingHorizontal: 16 }]}>
+    <View style={styles.pageContent}>
       <Text style={[styles.titulo, { marginBottom: 20, textAlign: 'center' }]}>
         📋 Minhas Denúncias
       </Text>
 
       {suportes.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <View style={styles.emptyStateContainer}>
           <Ionicons name="document-text-outline" size={64} color="#ccc" />
-          <Text style={{ color: '#999', fontSize: 16, marginTop: 16, textAlign: 'center' }}>
+          <Text style={styles.emptyStateTitle}>
             Você ainda não fez nenhuma{'\n'}denúncia ou relatório
           </Text>
-          <Text style={{ color: '#666', fontSize: 14, marginTop: 8, textAlign: 'center' }}>
+          <Text style={styles.emptyStateText}>
             Use a aba "Suporte" para{'\n'}reportar problemas
           </Text>
         </View>
@@ -304,7 +226,7 @@ export default function MinhasDenuncias() {
           keyExtractor={(item) => item.id || ''}
           renderItem={renderCard}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={styles.flatlistContentContainer}
         />
       )}
 
@@ -315,67 +237,36 @@ export default function MinhasDenuncias() {
         transparent={false}
         onRequestClose={() => setModalVisible(false)}
       >
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <KeyboardAvoidingView style={styles.flexOne} behavior="padding">
           <ScrollView
-            contentContainerStyle={[styles.container, { paddingVertical: 20 }]}
+            contentContainerStyle={styles.pageContent}
             keyboardShouldPersistTaps="handled"
           >
             {/* Header */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 20,
-              }}
-            >
+            <View style={styles.modalHeader}>
               <Text style={[styles.titulo, { margin: 0 }]}>Detalhes da Denúncia</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={themeColors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {suporteSelecionado && (
               <>
                 {/* Informações Básicas */}
-                <View
-                  style={{
-                    backgroundColor: '#f5f5f5',
-                    padding: 16,
-                    borderRadius: 8,
-                    marginBottom: 16,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      marginBottom: 8,
-                      color: '#333',
-                      fontSize: 16,
-                    }}
-                  >
+                <View style={styles.modalSection}>
+                  <Text style={styles.cardTitle}>
                     📝 {getTipoEmoji(suporteSelecionado.tipo)} {suporteSelecionado.tipo.charAt(0).toUpperCase() + suporteSelecionado.tipo.slice(1)}
                   </Text>
 
-                  <Text style={{ color: '#555', marginBottom: 4 }}>
+                  <Text style={styles.cardSubtitle}>
                     📅 Enviado em {formatarData(suporteSelecionado.data)}
                   </Text>
 
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: '#fff',
-                      backgroundColor: getStatusColor(suporteSelecionado.status),
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      borderRadius: 12,
-                      fontWeight: 'bold',
-                      alignSelf: 'flex-start',
-                      marginTop: 8,
-                    }}
-                  >
-                    {getStatusEmoji(suporteSelecionado.status)} {suporteSelecionado.status.toUpperCase()}
-                  </Text>
+                  <View style={[styles.badge, { backgroundColor: getStatusColor(suporteSelecionado.status), marginTop: 8 }]}> 
+                    <Text style={styles.badgeText}>
+                      {getStatusEmoji(suporteSelecionado.status)} {suporteSelecionado.status.toUpperCase()}
+                    </Text>
+                  </View>
                 </View>
 
                 {/* Descrição Completa */}
@@ -383,16 +274,16 @@ export default function MinhasDenuncias() {
                   Sua Descrição
                 </Text>
                 <View
-                  style={{
-                    backgroundColor: '#f9f9f9',
-                    padding: 12,
-                    borderRadius: 8,
-                    marginBottom: 16,
-                    borderLeftWidth: 3,
-                    borderLeftColor: getStatusColor(suporteSelecionado.status),
-                  }}
+                  style={[
+                    styles.modalSection,
+                    {
+                      backgroundColor: themeColors.card,
+                      borderLeftWidth: 3,
+                      borderLeftColor: getStatusColor(suporteSelecionado.status),
+                    },
+                  ]}
                 >
-                  <Text style={{ color: '#333', lineHeight: 20 }}>
+                  <Text style={styles.modalText}>
                     {suporteSelecionado.descricao}
                   </Text>
                 </View>
@@ -402,19 +293,19 @@ export default function MinhasDenuncias() {
                   Status Atual
                 </Text>
                 <View
-                  style={{
-                    backgroundColor: '#e8f4fd',
-                    padding: 12,
-                    borderRadius: 8,
-                    marginBottom: 16,
-                    borderLeftWidth: 3,
-                    borderLeftColor: '#007AFF',
-                  }}
+                  style={[
+                    styles.modalSection,
+                    {
+                      backgroundColor: 'rgba(4,217,196,0.12)',
+                      borderLeftWidth: 3,
+                      borderLeftColor: themeColors.secondary,
+                    },
+                  ]}
                 >
-                  <Text style={{ color: '#007AFF', fontSize: 14, fontWeight: '600', marginBottom: 4 }}>
+                  <Text style={[styles.cardSectionLabel, { color: themeColors.secondary }]}> 
                     📊 {getStatusTexto(suporteSelecionado.status)}
                   </Text>
-                  <Text style={{ color: '#555', fontSize: 13 }}>
+                  <Text style={styles.modalText}>
                     A administração está trabalhando no seu caso. Você será notificado de qualquer atualização.
                   </Text>
                 </View>
@@ -425,21 +316,21 @@ export default function MinhasDenuncias() {
                 </Text>
 
                 {carregandoMensagens ? (
-                  <View style={{ alignItems: 'center', padding: 20 }}>
-                    <ActivityIndicator size="small" color="#007AFF" />
+                  <View style={[styles.modalSection, { alignItems: 'center', padding: 20 }]}> 
+                    <ActivityIndicator size="small" color={themeColors.secondary} />
                   </View>
                 ) : (
                   <View
-                    style={{
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: 8,
-                      padding: 12,
-                      marginBottom: 16,
-                      maxHeight: 300,
-                    }}
+                    style={[
+                      styles.modalSection,
+                      {
+                        backgroundColor: themeColors.card,
+                        maxHeight: 300,
+                      },
+                    ]}
                   >
                     {mensagens.length === 0 ? (
-                      <Text style={{ color: '#666', textAlign: 'center', fontStyle: 'italic' }}>
+                      <Text style={[styles.modalText, { textAlign: 'center', fontStyle: 'italic' }]}> 
                         Nenhuma mensagem da administração ainda.{'\n'}Aguarde o contato.
                       </Text>
                     ) : (
@@ -447,30 +338,32 @@ export default function MinhasDenuncias() {
                         {mensagens.map((msg) => (
                           <View
                             key={msg.id}
-                            style={{
-                              backgroundColor: msg.autor === 'Administrador' ? '#007AFF' : '#e9ecef',
-                              padding: 12,
-                              borderRadius: 8,
-                              marginBottom: 8,
-                              alignSelf: msg.autor === 'Administrador' ? 'flex-start' : 'flex-end',
-                              maxWidth: '85%',
-                            }}
+                            style={[
+                              styles.messageBubble,
+                              {
+                                backgroundColor: msg.autor === 'Administrador' ? themeColors.secondary : themeColors.card,
+                                alignSelf: msg.autor === 'Administrador' ? 'flex-start' : 'flex-end',
+                              },
+                            ]}
                           >
                             <Text
-                              style={{
-                                color: msg.autor === 'Administrador' ? '#fff' : '#333',
-                                fontSize: 14,
-                                lineHeight: 18,
-                              }}
+                              style={[
+                                styles.modalText,
+                                {
+                                  color: msg.autor === 'Administrador' ? themeColors.white : themeColors.textPrimary,
+                                  lineHeight: 18,
+                                },
+                              ]}
                             >
                               {msg.texto}
                             </Text>
                             <Text
-                              style={{
-                                color: msg.autor === 'Administrador' ? '#e6f3ff' : '#666',
-                                fontSize: 10,
-                                marginTop: 6,
-                              }}
+                              style={[
+                                styles.messageBubbleMeta,
+                                {
+                                  color: msg.autor === 'Administrador' ? themeColors.white : themeColors.textSecondary,
+                                },
+                              ]}
                             >
                               {msg.autor} • {formatarData(msg.data)}
                             </Text>
@@ -485,7 +378,7 @@ export default function MinhasDenuncias() {
                   style={[
                     styles.botao,
                     {
-                      backgroundColor: '#6c757d',
+                      backgroundColor: themeColors.disabled,
                     },
                   ]}
                   onPress={() => setModalVisible(false)}

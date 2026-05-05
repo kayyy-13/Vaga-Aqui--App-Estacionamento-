@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { firestore } from '../firebase';
 import { Resvaga } from '../model/Resvaga';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 export default function Admin() {
   const navigation = useNavigation<any>();
@@ -80,9 +80,9 @@ export default function Admin() {
         <Text style={styles.chartTitle}>Visão geral rápida</Text>
         <View style={styles.chartBars}>
           {[
-            { label: 'Total', value: totalVagas, color: '#02A676', formatted: `${totalVagas}` },
-            { label: 'Ocupadas', value: vagasOcupadas, color: '#d32f2f', formatted: `${vagasOcupadas}` },
-            { label: 'Dia', value: reservasDia, color: '#005A5B', formatted: `${reservasDia}` },
+            { label: 'Total', value: totalVagas, color: themeColors.accent2, formatted: `${totalVagas}` },
+            { label: 'Ocupadas', value: vagasOcupadas, color: themeColors.danger, formatted: `${vagasOcupadas}` },
+            { label: 'Dia', value: reservasDia, color: themeColors.secondary, formatted: `${reservasDia}` },
           ].map(item => {
             const maxValue = Math.max(totalVagas, vagasOcupadas, reservasDia, 1);
             const height = (item.value / maxValue) * 140;

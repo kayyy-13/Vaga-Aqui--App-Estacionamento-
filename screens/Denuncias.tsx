@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { firestore } from '../firebase';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 import { Suporte } from '../model/Suporte';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -159,13 +159,13 @@ export default function Denuncias() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'aberto':
-        return '#ffc107'; // 🟡
+        return themeColors.warning; // 🟡
       case 'em análise':
-        return '#007bff'; // 🔵
+        return themeColors.secondary; // 🔵
       case 'resolvido':
-        return '#28a745'; // 🟢
+        return themeColors.success; // 🟢
       default:
-        return '#6c757d';
+        return themeColors.disabled;
     }
   };
 
@@ -197,110 +197,49 @@ export default function Denuncias() {
   };
 
   const renderCard = ({ item }: { item: Suporte }) => (
-    <View
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        marginBottom: 16,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        borderLeftWidth: 4,
-        borderLeftColor: getStatusColor(item.status),
-      }}
-    >
-      {/* Header com usuário e data */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 12,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+    <View style={[styles.card, { borderLeftColor: getStatusColor(item.status) }]}> 
+      <View style={styles.cardHeader}>
+        <View style={styles.cardHeaderInfo}>
+          <Text style={styles.cardTitle}>
             👤 {item.usuarioNome}
           </Text>
-          <Text style={{ fontSize: 12, color: '#666' }}>
+          <Text style={styles.cardSubtitle}>
             📅 {formatarData(item.data)}
           </Text>
         </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text
-            style={{
-              fontSize: 12,
-              color: '#fff',
-              backgroundColor: getStatusColor(item.status),
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 12,
-              fontWeight: 'bold',
-              marginBottom: 4,
-            }}
-          >
-            {getStatusEmoji(item.status)} {item.status}
-          </Text>
+        <View style={styles.cardHeaderRight}>
+          <View style={[styles.badge, { backgroundColor: getStatusColor(item.status) }]}> 
+            <Text style={styles.badgeText}>
+              {getStatusEmoji(item.status)} {item.status}
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Tipo */}
-      <View style={{ marginBottom: 8 }}>
-        <Text style={{ fontSize: 14, color: '#555', fontWeight: '600' }}>
+      <View style={styles.cardSection}>
+        <Text style={[styles.cardText, { fontWeight: '600' }]}> 
           📝 {getTipoEmoji(item.tipo)} {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
         </Text>
       </View>
 
-      {/* Descrição */}
-      <View style={{ marginBottom: 16 }}>
-        <Text
-          style={{
-            fontSize: 14,
-            color: '#444',
-            lineHeight: 20,
-          }}
-          numberOfLines={3}
-        >
+      <View style={styles.cardSection}>
+        <Text style={styles.cardText} numberOfLines={3}>
           📍 {item.descricao}
         </Text>
       </View>
 
-      {/* Botão Detalhar */}
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#007AFF',
-          borderRadius: 8,
-          paddingVertical: 10,
-          alignItems: 'center',
-          flexDirection: 'row',
-          justifyContent: 'center',
-        }}
-        onPress={() => abrirDetalhes(item)}
-      >
+      <TouchableOpacity style={[styles.button, styles.cardButton]} onPress={() => abrirDetalhes(item)}>
         <Ionicons name="eye" size={16} color="#fff" />
-        <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 6 }}>
-          Detalhar
-        </Text>
+        <Text style={[styles.buttonText, { marginLeft: 6 }]}>Detalhar</Text>
       </TouchableOpacity>
     </View>
   );
 
   if (carregando) {
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 16, color: '#666' }}>
+      <View style={[styles.container, styles.centeredContainer]}>
+        <ActivityIndicator size="large" color={themeColors.secondary} />
+        <Text style={styles.textHelper}>
           Carregando denúncias...
         </Text>
       </View>
@@ -308,21 +247,15 @@ export default function Denuncias() {
   }
 
   return (
-    <View style={[styles.container, { paddingHorizontal: 16 }]}>
+    <View style={styles.pageContent}>
       <Text style={[styles.titulo, { marginBottom: 20, textAlign: 'center' }]}>
         📋 Centro de Denúncias
       </Text>
 
       {suportes.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <View style={styles.emptyStateContainer}>
           <Ionicons name="document-text-outline" size={64} color="#ccc" />
-          <Text style={{ color: '#999', fontSize: 16, marginTop: 16, textAlign: 'center' }}>
+          <Text style={styles.emptyStateTitle}>
             Nenhuma denúncia ou problema{'\n'}reportado ainda
           </Text>
         </View>
@@ -332,7 +265,7 @@ export default function Denuncias() {
           keyExtractor={(item) => item.id || ''}
           renderItem={renderCard}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={styles.flatlistContentContainer}
         />
       )}
 
@@ -343,70 +276,41 @@ export default function Denuncias() {
         transparent={false}
         onRequestClose={() => setModalVisible(false)}
       >
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <KeyboardAvoidingView style={styles.flexOne} behavior="padding">
           <ScrollView
-            contentContainerStyle={[styles.container, { paddingVertical: 20 }]}
+            contentContainerStyle={styles.pageContent}
             keyboardShouldPersistTaps="handled"
           >
             {/* Header */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 20,
-              }}
-            >
+            <View style={styles.modalHeader}>
               <Text style={[styles.titulo, { margin: 0 }]}>Detalhes da Denúncia</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={themeColors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {suporteSelecionado && (
               <>
                 {/* Informações Básicas */}
-                <View
-                  style={{
-                    backgroundColor: '#f5f5f5',
-                    padding: 16,
-                    borderRadius: 8,
-                    marginBottom: 16,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      marginBottom: 8,
-                      color: '#333',
-                      fontSize: 16,
-                    }}
-                  >
+                <View style={styles.modalSection}>
+                  <Text style={styles.cardTitle}>
                     👤 {suporteSelecionado.usuarioNome}
                   </Text>
 
-                  <Text style={{ color: '#555', marginBottom: 4 }}>
+                  <Text style={styles.cardSubtitle}>
                     📅 {formatarData(suporteSelecionado.data)}
                   </Text>
 
-                  <Text style={{ color: '#555', marginBottom: 8 }}>
+                  <Text style={styles.cardText}>
                     📝 {getTipoEmoji(suporteSelecionado.tipo)} {suporteSelecionado.tipo.charAt(0).toUpperCase() + suporteSelecionado.tipo.slice(1)}
                   </Text>
 
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: '#fff',
-                      backgroundColor: getStatusColor(suporteSelecionado.status),
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderRadius: 12,
-                      fontWeight: 'bold',
-                      alignSelf: 'flex-start',
-                    }}
-                  >
-                    {getStatusEmoji(suporteSelecionado.status)} {suporteSelecionado.status}
-                  </Text>
+                  <View style={[styles.badge, { backgroundColor: getStatusColor(suporteSelecionado.status), marginTop: 8 }]}> 
+                    <Text style={styles.badgeText}>
+                      {getStatusEmoji(suporteSelecionado.status)} {suporteSelecionado.status}
+                    </Text>
+                  </View>
+
                 </View>
 
                 {/* Descrição Completa */}
@@ -414,16 +318,16 @@ export default function Denuncias() {
                   Descrição Completa
                 </Text>
                 <View
-                  style={{
-                    backgroundColor: '#f9f9f9',
-                    padding: 12,
-                    borderRadius: 8,
-                    marginBottom: 16,
-                    borderLeftWidth: 3,
-                    borderLeftColor: getStatusColor(suporteSelecionado.status),
-                  }}
+                  style={[
+                    styles.modalSection,
+                    {
+                      backgroundColor: themeColors.card,
+                      borderLeftWidth: 3,
+                      borderLeftColor: getStatusColor(suporteSelecionado.status),
+                    },
+                  ]}
                 >
-                  <Text style={{ color: '#333', lineHeight: 20 }}>
+                  <Text style={styles.modalText}>
                     {suporteSelecionado.descricao}
                   </Text>
                 </View>
@@ -432,33 +336,25 @@ export default function Denuncias() {
                 <Text style={[styles.label, { marginBottom: 8 }]}>
                   Alterar Status
                 </Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                    marginBottom: 16,
-                  }}
-                >
+                <View style={styles.rowWrap}>
                   {['aberto', 'em análise', 'resolvido', 'fechado'].map((status) => (
                     <TouchableOpacity
                       key={status}
-                      style={{
-                        backgroundColor: suporteSelecionado.status === status ? getStatusColor(status) : '#e9ecef',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 20,
-                        borderWidth: suporteSelecionado.status === status ? 2 : 0,
-                        borderColor: '#fff',
-                      }}
+                      style={[
+                        styles.statusChip,
+                        {
+                          backgroundColor: suporteSelecionado.status === status ? getStatusColor(status) : themeColors.card,
+                        },
+                      ]}
                       onPress={() => atualizarStatus(suporteSelecionado.id!, status)}
                     >
                       <Text
-                        style={{
-                          color: suporteSelecionado.status === status ? '#fff' : '#333',
-                          fontWeight: 'bold',
-                          fontSize: 12,
-                        }}
+                        style={[
+                          styles.statusChipText,
+                          {
+                            color: suporteSelecionado.status === status ? themeColors.white : themeColors.textPrimary,
+                          },
+                        ]}
                       >
                         {getStatusEmoji(status)} {status}
                       </Text>
@@ -472,21 +368,23 @@ export default function Denuncias() {
                 </Text>
 
                 {carregandoMensagens ? (
-                  <View style={{ alignItems: 'center', padding: 20 }}>
-                    <ActivityIndicator size="small" color="#007AFF" />
+                  <View style={[styles.modalSection, { alignItems: 'center', padding: 20 }]}> 
+                    <ActivityIndicator size="small" color={themeColors.secondary} />
                   </View>
                 ) : (
                   <View
-                    style={{
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: 8,
-                      padding: 12,
-                      marginBottom: 16,
-                      maxHeight: 200,
-                    }}
+                    style={[
+                      styles.modalSection,
+                      {
+                        backgroundColor: themeColors.card,
+                        maxHeight: 200,
+                        padding: 12,
+                        marginBottom: 16,
+                      },
+                    ]}
                   >
                     {mensagens.length === 0 ? (
-                      <Text style={{ color: '#666', textAlign: 'center', fontStyle: 'italic' }}>
+                      <Text style={[styles.modalText, { textAlign: 'center', fontStyle: 'italic', color: themeColors.textSecondary }]}> 
                         Nenhuma mensagem ainda
                       </Text>
                     ) : (
@@ -494,30 +392,32 @@ export default function Denuncias() {
                         {mensagens.map((msg) => (
                           <View
                             key={msg.id}
-                            style={{
-                              backgroundColor: msg.autor === 'Administrador' ? '#007AFF' : '#e9ecef',
-                              padding: 10,
-                              borderRadius: 8,
-                              marginBottom: 8,
-                              alignSelf: msg.autor === 'Administrador' ? 'flex-end' : 'flex-start',
-                              maxWidth: '80%',
-                            }}
+                            style={[
+                              styles.messageBubble,
+                              {
+                                backgroundColor: msg.autor === 'Administrador' ? themeColors.secondary : themeColors.card,
+                                alignSelf: msg.autor === 'Administrador' ? 'flex-end' : 'flex-start',
+                              },
+                            ]}
                           >
                             <Text
-                              style={{
-                                color: msg.autor === 'Administrador' ? '#fff' : '#333',
-                                fontSize: 14,
-                                lineHeight: 18,
-                              }}
+                              style={[
+                                styles.modalText,
+                                {
+                                  color: msg.autor === 'Administrador' ? themeColors.white : themeColors.textPrimary,
+                                  lineHeight: 18,
+                                },
+                              ]}
                             >
                               {msg.texto}
                             </Text>
                             <Text
-                              style={{
-                                color: msg.autor === 'Administrador' ? '#e6f3ff' : '#666',
-                                fontSize: 10,
-                                marginTop: 4,
-                              }}
+                              style={[
+                                styles.messageBubbleMeta,
+                                {
+                                  color: msg.autor === 'Administrador' ? themeColors.white : themeColors.textSecondary,
+                                },
+                              ]}
                             >
                               {msg.autor} • {formatarData(msg.data)}
                             </Text>
@@ -535,12 +435,8 @@ export default function Denuncias() {
                 <TextInput
                   style={[
                     styles.input,
-                    {
-                      textAlignVertical: 'top',
-                      paddingTop: 12,
-                      minHeight: 80,
-                      marginBottom: 12,
-                    },
+                    styles.textArea,
+                    { marginBottom: 12 },
                   ]}
                   placeholder="Digite sua mensagem..."
                   placeholderTextColor="#999"
@@ -570,7 +466,7 @@ export default function Denuncias() {
                   style={[
                     styles.botao,
                     {
-                      backgroundColor: '#6c757d',
+                      backgroundColor: themeColors.disabled,
                     },
                   ]}
                   onPress={() => setModalVisible(false)}

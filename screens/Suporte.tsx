@@ -96,9 +96,9 @@ export default function Suporte() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+    <KeyboardAvoidingView style={styles.flexOne} behavior="padding">
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingVertical: 20 }]}
+        contentContainerStyle={styles.pageContent}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={[styles.titulo, { marginBottom: 30 }]}>
@@ -106,26 +106,17 @@ export default function Suporte() {
         </Text>
 
         {/* Campo Tipo */}
-        <View style={{ marginBottom: 20 }}>
+        <View style={styles.cardSection}>
           <Text style={[styles.label, { marginBottom: 8 }]}>
             Tipo de Comunicação
           </Text>
-          <View
-            style={[
-              styles.input,
-              {
-                justifyContent: 'center',
-                paddingHorizontal: 0,
-                paddingVertical: 0,
-              },
-            ]}
-          >
+          <View style={styles.pickerContainer}>
             <Picker
               selectedValue={tipo}
               onValueChange={(itemValue) =>
                 setTipo(itemValue as 'denúncia' | 'problema' | 'outros')
               }
-              style={{ color: '#333' }}
+              style={styles.pickerStyle}
             >
               <Picker.Item label="Problema técnico" value="problema" />
               <Picker.Item label="Denúncia" value="denúncia" />
@@ -136,7 +127,7 @@ export default function Suporte() {
 
         {/* Campo Tipo Personalizado (aparece apenas quando "Outros" é selecionado) */}
         {tipo === 'outros' && (
-          <View style={{ marginBottom: 20 }}>
+          <View style={styles.cardSection}>
             <Text style={[styles.label, { marginBottom: 8 }]}>
               Especifique o tipo de problema
             </Text>
@@ -152,17 +143,10 @@ export default function Suporte() {
         )}
 
         {/* Campo Descrição */}
-        <View style={{ marginBottom: 20 }}>
+        <View style={styles.cardSection}>
           <Text style={[styles.label, { marginBottom: 8 }]}>Descrição</Text>
           <TextInput
-            style={[
-              styles.input,
-              {
-                textAlignVertical: 'top',
-                paddingTop: 12,
-                minHeight: 120,
-              },
-            ]}
+            style={[styles.input, styles.textArea]}
             placeholder="Descreva em detalhes o seu problema ou denúncia..."
             placeholderTextColor="#999"
             multiline
@@ -171,7 +155,7 @@ export default function Suporte() {
             onChangeText={setDescricao}
             editable={!carregando}
           />
-          <Text style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+          <Text style={styles.textHelper}>
             {descricao.length}/500
           </Text>
         </View>
@@ -193,18 +177,11 @@ export default function Suporte() {
         </TouchableOpacity>
 
         {/* Informações */}
-        <View
-          style={{
-            marginTop: 30,
-            padding: 15,
-            backgroundColor: '#f0f0f0',
-            borderRadius: 8,
-          }}
-        >
-          <Text style={{ fontWeight: 'bold', marginBottom: 8, color: '#333' }}>
+        <View style={styles.infoBox}>
+          <Text style={styles.infoBoxTitle}>
             ℹ️ Informações importantes:
           </Text>
-          <Text style={{ color: '#555', fontSize: 13, lineHeight: 18 }}>
+          <Text style={styles.infoBoxText}>
             • Suas comunicações serão analisadas pela equipe de administração
             {'\n'}• Você receberá uma resposta em breve
             {'\n'}• Denúncias anônimas serão tratadas com confidencialidade

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Platform } from "react-native";
 
 import Home         from "./Home";
 import Rua         from "./Rua";
@@ -13,17 +14,22 @@ import MinhasDenuncias from './MinhasDenuncias';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons as Icon } from '@expo/vector-icons';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Usuario } from "../model/Usuario";
 import { auth, firestore } from "../firebase";
 import { useEffect, useState } from "react";
 import { useReservationNotifications } from "../hooks/useReservationNotifications";
+import { themeColors } from '../estilo';
 
 const Tab = createBottomTabNavigator();
+const iconSize = 24;
 
 export default function Menu() {
+    const insets = useSafeAreaInsets();
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const { verificarReservasExpiradas, verificarReservasProximasAExpirar } = useReservationNotifications();
+    const bottomSpacing = Math.max(insets.bottom, Platform.OS === "ios" ? 20 : 18);
 
     useEffect(() => {
         listarUsuario();
@@ -51,15 +57,42 @@ export default function Menu() {
         <Tab.Navigator
             id="main-tabs"
             screenOptions={{
-                tabBarActiveTintColor: "#1a5c47",
-                tabBarActiveBackgroundColor: "#a5d1c3",
-                tabBarLabelStyle: { fontSize: 13, fontWeight: "900" }
+                headerShown: false,
+                tabBarHideOnKeyboard: true,
+                tabBarActiveTintColor: themeColors.primary,
+                tabBarInactiveTintColor: themeColors.textSecondary,
+                tabBarLabelStyle: {
+                    fontSize: 11,
+                    fontWeight: "700",
+                    marginTop: 2,
+                },
+                tabBarStyle: {
+                    height: 62 + bottomSpacing,
+                    paddingTop: 8,
+                    paddingBottom: bottomSpacing,
+                    backgroundColor: themeColors.card,
+                    borderTopColor: "rgba(255,255,255,0.12)",
+                    borderTopWidth: 1,
+                    elevation: 12,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: -2 },
+                    shadowOpacity: 0.18,
+                    shadowRadius: 8,
+                },
+                tabBarItemStyle: {
+                    paddingVertical: 2,
+                    minWidth: 0,
+                },
+                tabBarIconStyle: { width: iconSize, height: iconSize },
             }}
         >
                 <Tab.Screen
                     name='Página Inicial'
                     component={Home}
-                    options={{ tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} /> }}
+                    options={{
+                        tabBarLabel: 'Início',
+                        tabBarIcon: ({ color }) => <Icon name="home" size={iconSize} color={color} />
+                    }}
                 />
 
                 {usuario?.tipo !== '2' && (
@@ -67,7 +100,10 @@ export default function Menu() {
                         <Tab.Screen
                             name='Cadastro de Reserva'
                             component={Reserva}
-                            options={{ tabBarIcon: ({ color, size }) => <Icon name="car" size={size} color={color} /> }}
+                            options={{
+                                tabBarLabel: 'Reserva',
+                                tabBarIcon: ({ color }) => <Icon name="car" size={iconSize} color={color} />
+                            }}
                         />
                     </>
                 )}
@@ -75,14 +111,14 @@ export default function Menu() {
                 <Tab.Screen
                     name='Perfil'
                     component={Profile}
-                    options={{ tabBarIcon: ({ color, size }) => <Icon name="person" size={size} color={color} /> }}
+                    options={{ tabBarIcon: ({ color }) => <Icon name="person" size={iconSize} color={color} /> }}
                 />
 
                 {usuario?.tipo !== '2' && (
                     <Tab.Screen
                         name='Suporte'
                         component={Suporte}
-                        options={{ tabBarIcon: ({ color, size }) => <Icon name="help-circle" size={size} color={color} /> }}
+                        options={{ tabBarIcon: ({ color }) => <Icon name="help-circle" size={iconSize} color={color} /> }}
                     />
                 )}
 
@@ -90,7 +126,10 @@ export default function Menu() {
                     <Tab.Screen
                         name='Minhas Denúncias'
                         component={MinhasDenuncias}
-                        options={{ tabBarIcon: ({ color, size }) => <Icon name="document-text" size={size} color={color} /> }}
+                        options={{
+                            tabBarLabel: 'Denúncias',
+                            tabBarIcon: ({ color }) => <Icon name="document-text" size={iconSize} color={color} />
+                        }}
                     />
                 )}
 
@@ -98,7 +137,7 @@ export default function Menu() {
                     <Tab.Screen
                         name='Admin'
                         component={Admin}
-                        options={{ tabBarIcon: ({ color, size }) => <Icon name="lock-closed" size={size} color={color} /> }}
+                        options={{ tabBarIcon: ({ color }) => <Icon name="lock-closed" size={iconSize} color={color} /> }}
                     />
                 )}
 
@@ -106,7 +145,10 @@ export default function Menu() {
                     <Tab.Screen
                         name='Denúncias'
                         component={Denuncias}
-                        options={{ tabBarIcon: ({ color, size }) => <Icon name="alert-circle" size={size} color={color} /> }}
+                        options={{
+                            tabBarLabel: 'Denúncias',
+                            tabBarIcon: ({ color }) => <Icon name="alert-circle" size={iconSize} color={color} />
+                        }}
                     />
                 )}
 

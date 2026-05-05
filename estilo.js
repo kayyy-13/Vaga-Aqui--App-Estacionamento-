@@ -1,15 +1,26 @@
 import { StyleSheet } from 'react-native';
 
 const colors = {
-  primary: '#014e40', // titulos e elementos principais
-  secondary: '#005A5B', // fundo do containerHome
-  accent1: '#007369', // lables e bordas
-  accent2: '#6e8788', // Botões principais e labels de formulário
-  accent3: '#02A676',
-  accent4: '#005A5B', // Botão de voltar e bordas de listas
+  primary: '#05F2AF', // destaque principal
+  secondary: '#0597F2', // 2º tom para botões e ênfase
+  accent1: '#04C4D9', // labels, bordas e tags
+  accent2: '#04D9C4', // botões secundários e destaques
+  accent3: '#05F2AF',
+  accent4: '#04C4D9',
   white: '#fff',
-  lightGray: '#e9e9e9b8',
+  lightGray: 'rgba(255,255,255,0.12)',
+  background: '#051F40',
+  card: '#072A5A',
+  textPrimary: '#E8F8FF',
+  textSecondary: '#BBDFFF',
+  danger: '#FF6B6B',
+  success: '#05F2AF',
+  warning: '#F2D904',
+  info: '#0597F2',
+  disabled: '#5B7A9B',
 };
+
+export const themeColors = colors;
 
 export default StyleSheet.create({
   container: {
@@ -17,14 +28,207 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    backgroundColor: colors.background,
+  },
+  pageContent: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 30,
+    backgroundColor: colors.background,
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  flexOne: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accent1,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  cardHeaderInfo: {
+    flex: 1,
+  },
+  cardHeaderRight: {
+    alignItems: 'flex-end',
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  cardSection: {
+    marginBottom: 16,
+  },
+  cardSectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  cardText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  cardButton: {
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  badgeText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  statusChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+  statusChipText: {
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  rowWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  emptyStateTitle: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalSection: {
+    backgroundColor: colors.card,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  modalSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  modalText: {
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  messageBubble: {
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    maxWidth: '85%',
+  },
+  messageBubbleMeta: {
+    fontSize: 10,
+    marginTop: 6,
+    color: colors.textSecondary,
+  },
+  infoBox: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+  },
+  infoBoxTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: colors.primary,
+  },
+  infoBoxText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  textHelper: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  textArea: {
+    textAlignVertical: 'top',
+    paddingTop: 12,
+    minHeight: 120,
+  },
+  pickerContainer: {
+    backgroundColor: colors.card,
+    borderRadius: 10,
+    marginBottom: 20,
+    justifyContent: 'center',
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
+  whitePickerContainer: {
     backgroundColor: colors.white,
+    borderRadius: 10,
+    marginBottom: 20,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 0,
+  },
+  pickerStyle: {
+    color: colors.textPrimary,
   },
   containerHome: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.background,
   },
   titulo: {
     fontSize: 22, //titulo principais
@@ -33,6 +237,11 @@ export default StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
+  logo: {
+    width: 330,
+    height: 250,
+  
+  },
   label: {
     color: colors.accent1,
     fontWeight: 'bold',
@@ -40,7 +249,7 @@ export default StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    color: '#000',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   inputView: {
@@ -50,10 +259,11 @@ export default StyleSheet.create({
   input: {
     marginBottom: 20,
     backgroundColor: colors.white,
+    color: colors.textPrimary,
   },
   inputPicker: {
     marginBottom: 20,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingLeft: 8,
   },
   textPicker: {
@@ -79,7 +289,7 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
   buttonSecondary: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderColor: colors.accent1,
     borderWidth: 2,
   },
@@ -89,7 +299,7 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   buttonOutline: {
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
     borderColor: colors.accent1,
     borderWidth: 2,
   },
@@ -135,7 +345,7 @@ export default StyleSheet.create({
     borderColor: colors.accent2,
   },
   filterButtonInactive: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderColor: colors.accent1,
   },
   filterButtonTextActive: {
@@ -148,7 +358,7 @@ export default StyleSheet.create({
   },
   //cancelar reserva
   buttonDelete: {
-    backgroundColor: '#d32f2f',
+    backgroundColor: colors.danger,
     flex: 1,
   },
   //style "minhas reservas"
@@ -162,6 +372,16 @@ export default StyleSheet.create({
     borderRadius: 10,
     alignSelf: 'center',
   },
+  lightCard: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: 'rgba(5, 242, 175, 0.25)',
+    padding: 12,
+    marginTop: 10,
+    width: '90%',
+    borderRadius: 12,
+    alignSelf: 'center',
+  },
   listText: {
     fontSize: 17,
   },
@@ -169,10 +389,6 @@ export default StyleSheet.create({
     color: colors.accent2,
     fontWeight: 'bold',
     marginTop: 10,
-  },
-  pickerContainer: {
-    backgroundColor: colors.white,
-    marginTop: 5,
   },
   backButtonContainer: {
     flexDirection: 'row',
@@ -183,7 +399,7 @@ export default StyleSheet.create({
   backButtonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.accent3,
+    backgroundColor: colors.accent1,
     padding: 10,
     borderRadius: 10,
   },
@@ -207,7 +423,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     paddingTop: 30,
     paddingHorizontal: 20,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   avatarContainer: {
     alignItems: 'center',
@@ -241,7 +457,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     padding: 14,
     borderRadius: 14,
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.card,
     marginBottom: 12,
   },
   optionIcon: {
@@ -250,11 +466,11 @@ export default StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
-    color: colors.primary,
+    color: colors.textPrimary,
     fontWeight: '600',
   },
   logoutButton: {
-    backgroundColor: '#d32f2f',
+    backgroundColor: colors.danger,
     width: '100%',
     padding: 14,
     borderRadius: 12,
@@ -263,17 +479,17 @@ export default StyleSheet.create({
     marginTop: 20,
   },
   activeText: {
-    color: '#007369',
+    color: colors.accent2,
     fontWeight: '700',
   },
   expiredText: {
-    color: '#d32f2f',
+    color: colors.danger,
     fontWeight: '700',
   },
   tabsContainer: {
     flexDirection: 'row',
     marginBottom: 20,
-    backgroundColor: colors.lightGray,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: 4,
   },
@@ -284,10 +500,10 @@ export default StyleSheet.create({
     borderRadius: 8,
   },
   activeTab: {
-    backgroundColor: colors.white,
-    shadowColor: colors.shadow,
+    backgroundColor: colors.card,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -311,7 +527,7 @@ export default StyleSheet.create({
     flexWrap: 'wrap',
   },
   metricCard: {
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.card,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -333,7 +549,7 @@ export default StyleSheet.create({
   },
   chartContainer: {
     width: '90%',
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.card,
     padding: 16,
     borderRadius: 12,
     marginBottom: 20,
@@ -357,7 +573,7 @@ export default StyleSheet.create({
   chartBar: {
     width: '100%',
     maxWidth: 80,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     justifyContent: 'flex-end',
     overflow: 'hidden',
@@ -388,6 +604,7 @@ export default StyleSheet.create({
   reservaScreen: {
     flex: 1,
     width: '100%',
+    backgroundColor: colors.background,
   },
   reservaList: {
     flex: 1,
@@ -403,7 +620,7 @@ export default StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -423,7 +640,7 @@ export default StyleSheet.create({
     zIndex: 1,
   },
   reservaSearchInput: {
-    backgroundColor: 'rgba(255,255,255,0.94)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     paddingLeft: 26,
     borderRadius: 14,
   },
@@ -444,7 +661,7 @@ export default StyleSheet.create({
     borderColor: colors.accent2,
   },
   reservaFilterChipInactive: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderColor: colors.accent1,
   },
   reservaFilterChipTextActive: {
@@ -459,7 +676,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -480,11 +697,11 @@ export default StyleSheet.create({
     gap: 14,
   },
   reservaStreetCard: {
-    backgroundColor: 'rgba(255,255,255,0.94)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(1,78,64,0.08)',
+    borderColor: 'rgba(5,151,242,0.18)',
   },
   reservaStreetCardPressed: {
     transform: [{ scale: 0.985 }],
@@ -492,7 +709,7 @@ export default StyleSheet.create({
   },
   reservaStreetCardSelected: {
     borderColor: colors.accent3,
-    shadowColor: '#003840',
+    shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
@@ -511,7 +728,7 @@ export default StyleSheet.create({
     color: colors.primary,
   },
   reservaStreetMeta: {
-    color: '#5d6a67',
+    color: colors.textSecondary,
     marginTop: 4,
     fontSize: 13,
   },
@@ -528,18 +745,18 @@ export default StyleSheet.create({
     borderRadius: 999,
   },
   reservaBadgeAvailable: {
-    backgroundColor: 'rgba(2,166,118,0.14)',
+    backgroundColor: 'rgba(4,217,196,0.16)',
   },
   reservaBadgeFull: {
-    backgroundColor: 'rgba(211,47,47,0.12)',
+    backgroundColor: 'rgba(255,107,107,0.16)',
   },
   reservaBadgeTextAvailable: {
-    color: '#007369',
+    color: colors.accent1,
     fontWeight: '800',
     fontSize: 12,
   },
   reservaBadgeTextFull: {
-    color: '#d32f2f',
+    color: colors.danger,
     fontWeight: '800',
     fontSize: 12,
   },
@@ -552,7 +769,7 @@ export default StyleSheet.create({
     backgroundColor: colors.accent2,
   },
   reservaStreetButtonDisabled: {
-    backgroundColor: '#b9c1bf',
+    backgroundColor: colors.disabled,
   },
   reservaStreetButtonText: {
     color: colors.white,
@@ -560,7 +777,7 @@ export default StyleSheet.create({
     fontSize: 15,
   },
   reservaEmptyCard: {
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 22,
     alignItems: 'center',
@@ -572,11 +789,11 @@ export default StyleSheet.create({
     marginBottom: 6,
   },
   reservaEmptyText: {
-    color: '#5d6a67',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   reservaLoadingCard: {
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 24,
     alignItems: 'center',
@@ -588,7 +805,7 @@ export default StyleSheet.create({
     fontWeight: '700',
   },
   reservaFormCard: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 20,
     padding: 18,
     marginTop: 22,
@@ -601,15 +818,16 @@ export default StyleSheet.create({
   },
   reservaFormSubtitle: {
     fontSize: 14,
-    color: '#5d6a67',
+    color: colors.textSecondary,
     marginBottom: 10,
   },
   reservaSubmitDisabled: {
-    backgroundColor: '#aab3b0',
+    backgroundColor: colors.disabled,
   },
   homeScreen: {
     flex: 1,
     width: '100%',
+    backgroundColor: colors.background,
   },
   homeContent: {
     flex: 1,
@@ -629,7 +847,7 @@ export default StyleSheet.create({
     marginBottom: 18,
   },
   homeMiniList: {
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 16,
     gap: 10,
@@ -638,7 +856,7 @@ export default StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: 'rgba(1,78,64,0.06)',
+    backgroundColor: 'rgba(4,196,217,0.12)',
   },
   homeMiniListText: {
     color: colors.primary,
@@ -657,13 +875,13 @@ export default StyleSheet.create({
   },
   homeAdminCard: {
     width: '47%',
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 18,
   },
   homeAdminCardWide: {
     width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 18,
     padding: 18,
   },

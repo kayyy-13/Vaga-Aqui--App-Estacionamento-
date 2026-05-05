@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Alert } from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity, Alert, Image } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 /**
  * Tela de login para usuários comuns.
@@ -113,7 +113,8 @@ export default function Login() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <ImageBackground source={require('../assets/LOGIN.png')} resizeMode='stretch' style={styles.container}>
+      <View style={styles.container}>
+        <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode='contain' />
         <Text style={styles.titulo}>TELA DE LOGIN</Text>
 
         <View style={styles.inputView}>
@@ -121,7 +122,7 @@ export default function Login() {
             label='E-mail'
             onChangeText={texto => setEmail(texto)}
             style={styles.input}
-            activeUnderlineColor='#005A5B'
+            activeUnderlineColor={themeColors.accent1}
           />
 
           <TextInput
@@ -129,7 +130,7 @@ export default function Login() {
             onChangeText={texto => setSenha(texto)}
             secureTextEntry={true}
             style={styles.input}
-            activeUnderlineColor='#005A5B'
+            activeUnderlineColor={themeColors.accent1}
           />
         </View>
 
@@ -147,7 +148,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-      </ImageBackground>
+      </View>
     </KeyboardAvoidingView>
   );
 }
