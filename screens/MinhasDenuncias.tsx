@@ -156,13 +156,13 @@ export default function MinhasDenuncias() {
   };
 
   const renderCard = ({ item }: { item: Suporte }) => (
-    <View style={[styles.card, { borderLeftColor: getStatusColor(item.status) }]}> 
+    <View style={[styles.card, styles.denunciaCard, { borderLeftColor: getStatusColor(item.status) }]}> 
       <View style={styles.cardHeader}>
-        <View style={styles.cardHeaderInfo}>
-          <Text style={styles.cardTitle}>
+        <View style={[styles.cardHeaderInfo, styles.denunciaCardHeaderInfo]}>
+          <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
             📝 {getTipoEmoji(item.tipo)} {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
           </Text>
-          <Text style={styles.cardSubtitle}>
+          <Text style={[styles.cardSubtitle, styles.denunciaCardSubtitle]}>
             📅 {formatarData(item.data)}
           </Text>
         </View>
@@ -175,15 +175,15 @@ export default function MinhasDenuncias() {
         </View>
       </View>
 
-      <View style={styles.cardSection}>
-        <Text style={styles.cardText} numberOfLines={3}>
+      <View style={[styles.cardSection, styles.denunciaCardSection]}>
+        <Text style={[styles.cardText, styles.denunciaCardText]} numberOfLines={3}>
           📍 {item.descricao}
         </Text>
       </View>
 
-      <View style={[styles.cardSection, { marginBottom: 0 }]}> 
-        <Text style={styles.cardSectionLabel}>Status Atual</Text>
-        <Text style={styles.cardText}>{getStatusTexto(item.status)}</Text>
+      <View style={[styles.cardSection, styles.denunciaCardSection, { marginBottom: 0 }]}> 
+        <Text style={[styles.cardSectionLabel, styles.denunciaCardTitle]}>Status Atual</Text>
+        <Text style={[styles.cardText, styles.denunciaCardText]}>{getStatusTexto(item.status)}</Text>
       </View>
 
       <TouchableOpacity style={[styles.button, styles.cardButton]} onPress={() => abrirDetalhes(item)}>
@@ -226,7 +226,7 @@ export default function MinhasDenuncias() {
           keyExtractor={(item) => item.id || ''}
           renderItem={renderCard}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.flatlistContentContainer}
+          contentContainerStyle={styles.denunciaFlatlistContentContainer}
         />
       )}
 
@@ -253,12 +253,12 @@ export default function MinhasDenuncias() {
             {suporteSelecionado && (
               <>
                 {/* Informações Básicas */}
-                <View style={styles.modalSection}>
-                  <Text style={styles.cardTitle}>
+                <View style={[styles.modalSection, styles.denunciaModalSection]}>
+                  <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
                     📝 {getTipoEmoji(suporteSelecionado.tipo)} {suporteSelecionado.tipo.charAt(0).toUpperCase() + suporteSelecionado.tipo.slice(1)}
                   </Text>
 
-                  <Text style={styles.cardSubtitle}>
+                  <Text style={[styles.cardSubtitle, styles.denunciaCardSubtitle]}>
                     📅 Enviado em {formatarData(suporteSelecionado.data)}
                   </Text>
 
@@ -270,12 +270,13 @@ export default function MinhasDenuncias() {
                 </View>
 
                 {/* Descrição Completa */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Sua Descrição
                 </Text>
                 <View
                   style={[
                     styles.modalSection,
+                    styles.denunciaModalSection,
                     {
                       backgroundColor: themeColors.card,
                       borderLeftWidth: 3,
@@ -289,12 +290,13 @@ export default function MinhasDenuncias() {
                 </View>
 
                 {/* Status detalhado */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Status Atual
                 </Text>
                 <View
                   style={[
                     styles.modalSection,
+                    styles.denunciaModalSection,
                     {
                       backgroundColor: 'rgba(4,217,196,0.12)',
                       borderLeftWidth: 3,
@@ -302,7 +304,7 @@ export default function MinhasDenuncias() {
                     },
                   ]}
                 >
-                  <Text style={[styles.cardSectionLabel, { color: themeColors.secondary }]}> 
+                  <Text style={[styles.cardSectionLabel, styles.denunciaCardTitle, { color: themeColors.secondary }]}> 
                     📊 {getStatusTexto(suporteSelecionado.status)}
                   </Text>
                   <Text style={styles.modalText}>
@@ -311,18 +313,19 @@ export default function MinhasDenuncias() {
                 </View>
 
                 {/* Mensagens */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Conversa com a Administração ({mensagens.length})
                 </Text>
 
                 {carregandoMensagens ? (
-                  <View style={[styles.modalSection, { alignItems: 'center', padding: 20 }]}> 
+                  <View style={[styles.modalSection, styles.denunciaModalSection, { alignItems: 'center', padding: 20 }]}> 
                     <ActivityIndicator size="small" color={themeColors.secondary} />
                   </View>
                 ) : (
                   <View
                     style={[
                       styles.modalSection,
+                      styles.denunciaModalSection,
                       {
                         backgroundColor: themeColors.card,
                         maxHeight: 300,

@@ -33,7 +33,7 @@ export default function AdminLogin() {
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <View style={styles.container}>
+      <View style={styles.loginContent}>
         <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode='contain' />
         <Text style={styles.titulo}>LOGIN DE ADMINISTRADOR</Text>
 

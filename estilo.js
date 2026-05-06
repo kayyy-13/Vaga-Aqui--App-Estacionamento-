@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 
 const colors = {
   primary: '#05F2AF', // destaque principal
@@ -28,13 +28,14 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 20,
     backgroundColor: colors.background,
   },
   pageContent: {
     flex: 1,
     width: '100%',
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 10 : 10,
     paddingBottom: 30,
     backgroundColor: colors.background,
   },
@@ -44,6 +45,13 @@ export default StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  loginContent: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 80,
+  },
   flexOne: {
     flex: 1,
   },
@@ -52,6 +60,9 @@ export default StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginBottom: 16,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -65,9 +76,11 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    width: '100%',
   },
   cardHeaderInfo: {
     flex: 1,
+    alignItems: 'center',
   },
   cardHeaderRight: {
     alignItems: 'flex-end',
@@ -77,28 +90,53 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: colors.primary,
     marginBottom: 4,
+    textAlign: 'center',
   },
   cardSubtitle: {
     fontSize: 12,
     color: colors.textSecondary,
+    textAlign: 'center',
   },
   cardSection: {
     marginBottom: 16,
+    width: '100%',
+    alignItems: 'center',
   },
   cardSectionLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
     marginBottom: 8,
+    textAlign: 'center',
   },
   cardText: {
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+    textAlign: 'center',
   },
   cardButton: {
     borderRadius: 12,
     paddingVertical: 12,
+  },
+  denunciaCard: {
+    maxWidth: '100%',
+    alignSelf: 'auto',
+  },
+  denunciaCardHeaderInfo: {
+    alignItems: 'stretch',
+  },
+  denunciaCardTitle: {
+    textAlign: 'left',
+  },
+  denunciaCardSubtitle: {
+    textAlign: 'left',
+  },
+  denunciaCardSection: {
+    alignItems: 'stretch',
+  },
+  denunciaCardText: {
+    textAlign: 'left',
   },
   badge: {
     paddingHorizontal: 10,
@@ -150,18 +188,36 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
   modalSection: {
     backgroundColor: colors.card,
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   modalSectionTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: colors.primary,
     marginBottom: 8,
+  },
+  denunciaModalSection: {
+    maxWidth: '100%',
+    alignItems: 'stretch',
+  },
+  denunciaLabel: {
+    alignSelf: 'auto',
+    textAlign: 'left',
+  },
+  denunciaFlatlistContentContainer: {
+    paddingBottom: 30,
   },
   modalText: {
     color: colors.textSecondary,
@@ -183,6 +239,10 @@ export default StyleSheet.create({
     padding: 15,
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   infoBoxTitle: {
     fontWeight: 'bold',
@@ -193,6 +253,7 @@ export default StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
     lineHeight: 18,
+    textAlign: 'center',
   },
   textHelper: {
     color: colors.textSecondary,
@@ -228,6 +289,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    paddingTop: 50,
     backgroundColor: colors.background,
   },
   titulo: {
@@ -236,24 +298,31 @@ export default StyleSheet.create({
     color: colors.primary,
     marginTop: 10,
     marginBottom: 10,
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   logo: {
-    width: 330,
-    height: 250,
+    width: 250,
+    height: 270,
   
   },
   label: {
     color: colors.accent1,
     fontWeight: 'bold',
     marginTop: 10, //distancia de itens
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   text: {
     fontSize: 16,
     color: colors.textPrimary,
     marginBottom: 10,
+    textAlign: 'center',
   },
   inputView: {
     width: '85%',
+    maxWidth: 420,
+    alignSelf: 'center',
     marginBottom: 20,
   },
   input: {
@@ -271,6 +340,9 @@ export default StyleSheet.create({
   },
   buttonView: {
     width: '85%',
+    maxWidth: 420,
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   button: {
     backgroundColor: colors.accent2,
@@ -313,6 +385,8 @@ export default StyleSheet.create({
   botao: {
     backgroundColor: colors.accent2,
     width: '85%',
+    maxWidth: 420,
+    alignSelf: 'center',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -330,6 +404,7 @@ export default StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
     marginBottom: 15,
     gap: 8,
@@ -416,15 +491,18 @@ export default StyleSheet.create({
   //style "perfil"
   profileFormContainer: {
     width: '90%',
+    maxWidth: 520,
+    alignSelf: 'center',
     marginTop: 20,
   },
   profileContainer: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 30,
+    paddingTop: 55,
     paddingHorizontal: 20,
     backgroundColor: colors.background,
   },
+
   avatarContainer: {
     alignItems: 'center',
     marginBottom: 24,
@@ -450,6 +528,8 @@ export default StyleSheet.create({
   },
   optionsContainer: {
     width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
     marginTop: 10,
   },
   optionItem: {
@@ -492,6 +572,9 @@ export default StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: 4,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
   tab: {
     flex: 1,
@@ -517,12 +600,16 @@ export default StyleSheet.create({
     fontWeight: '700',
   },
   flatlistContentContainer: {
+    alignItems: 'center',
+    width: '100%',
     paddingBottom: 30,
   },
   dashboard: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignSelf: 'center',
     width: '100%',
+    maxWidth: 520,
     marginBottom: 20,
     flexWrap: 'wrap',
   },
@@ -598,7 +685,7 @@ export default StyleSheet.create({
   reservaScrollContent: {
     width: '100%',
     paddingHorizontal: 18,
-    paddingTop: 18,
+    paddingTop: 56,
     paddingBottom: 32,
   },
   reservaScreen: {
@@ -833,7 +920,7 @@ export default StyleSheet.create({
     flex: 1,
     width: '100%',
     paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingTop: 70,
   },
   homeGreeting: {
     fontSize: 28,

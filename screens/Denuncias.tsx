@@ -197,13 +197,13 @@ export default function Denuncias() {
   };
 
   const renderCard = ({ item }: { item: Suporte }) => (
-    <View style={[styles.card, { borderLeftColor: getStatusColor(item.status) }]}> 
+    <View style={[styles.card, styles.denunciaCard, { borderLeftColor: getStatusColor(item.status) }]}> 
       <View style={styles.cardHeader}>
-        <View style={styles.cardHeaderInfo}>
-          <Text style={styles.cardTitle}>
+        <View style={[styles.cardHeaderInfo, styles.denunciaCardHeaderInfo]}>
+          <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
             👤 {item.usuarioNome}
           </Text>
-          <Text style={styles.cardSubtitle}>
+          <Text style={[styles.cardSubtitle, styles.denunciaCardSubtitle]}>
             📅 {formatarData(item.data)}
           </Text>
         </View>
@@ -216,14 +216,14 @@ export default function Denuncias() {
         </View>
       </View>
 
-      <View style={styles.cardSection}>
-        <Text style={[styles.cardText, { fontWeight: '600' }]}> 
+      <View style={[styles.cardSection, styles.denunciaCardSection]}>
+        <Text style={[styles.cardText, styles.denunciaCardText, { fontWeight: '600' }]}> 
           📝 {getTipoEmoji(item.tipo)} {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
         </Text>
       </View>
 
-      <View style={styles.cardSection}>
-        <Text style={styles.cardText} numberOfLines={3}>
+      <View style={[styles.cardSection, styles.denunciaCardSection]}>
+        <Text style={[styles.cardText, styles.denunciaCardText]} numberOfLines={3}>
           📍 {item.descricao}
         </Text>
       </View>
@@ -265,7 +265,7 @@ export default function Denuncias() {
           keyExtractor={(item) => item.id || ''}
           renderItem={renderCard}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.flatlistContentContainer}
+          contentContainerStyle={styles.denunciaFlatlistContentContainer}
         />
       )}
 
@@ -292,16 +292,16 @@ export default function Denuncias() {
             {suporteSelecionado && (
               <>
                 {/* Informações Básicas */}
-                <View style={styles.modalSection}>
-                  <Text style={styles.cardTitle}>
+                <View style={[styles.modalSection, styles.denunciaModalSection]}>
+                  <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
                     👤 {suporteSelecionado.usuarioNome}
                   </Text>
 
-                  <Text style={styles.cardSubtitle}>
+                  <Text style={[styles.cardSubtitle, styles.denunciaCardSubtitle]}>
                     📅 {formatarData(suporteSelecionado.data)}
                   </Text>
 
-                  <Text style={styles.cardText}>
+                  <Text style={[styles.cardText, styles.denunciaCardText]}>
                     📝 {getTipoEmoji(suporteSelecionado.tipo)} {suporteSelecionado.tipo.charAt(0).toUpperCase() + suporteSelecionado.tipo.slice(1)}
                   </Text>
 
@@ -314,12 +314,13 @@ export default function Denuncias() {
                 </View>
 
                 {/* Descrição Completa */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Descrição Completa
                 </Text>
                 <View
                   style={[
                     styles.modalSection,
+                    styles.denunciaModalSection,
                     {
                       backgroundColor: themeColors.card,
                       borderLeftWidth: 3,
@@ -333,7 +334,7 @@ export default function Denuncias() {
                 </View>
 
                 {/* Alterar Status */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Alterar Status
                 </Text>
                 <View style={styles.rowWrap}>
@@ -363,18 +364,19 @@ export default function Denuncias() {
                 </View>
 
                 {/* Mensagens */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Conversa ({mensagens.length})
                 </Text>
 
                 {carregandoMensagens ? (
-                  <View style={[styles.modalSection, { alignItems: 'center', padding: 20 }]}> 
+                  <View style={[styles.modalSection, styles.denunciaModalSection, { alignItems: 'center', padding: 20 }]}> 
                     <ActivityIndicator size="small" color={themeColors.secondary} />
                   </View>
                 ) : (
                   <View
                     style={[
                       styles.modalSection,
+                      styles.denunciaModalSection,
                       {
                         backgroundColor: themeColors.card,
                         maxHeight: 200,
@@ -429,7 +431,7 @@ export default function Denuncias() {
                 )}
 
                 {/* Enviar Mensagem */}
-                <Text style={[styles.label, { marginBottom: 8 }]}>
+                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Enviar Mensagem
                 </Text>
                 <TextInput
