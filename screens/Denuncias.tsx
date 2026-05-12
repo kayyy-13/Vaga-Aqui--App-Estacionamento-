@@ -65,8 +65,18 @@ export default function Denuncias() {
 
   const atualizarStatus = async (id: string, novoStatus: string) => {
     try {
+      const suporteRef = firestore.collection('suporte').doc(id);
+      const suporteDoc = await suporteRef.get();
+      const statusAtual = suporteDoc.data()?.status;
+
+      if (statusAtual === 'resolvido' && novoStatus !== 'resolvido') {
+        Alert.alert('Denúncia finalizada', 'Esta denúncia já foi resolvida e não pode mais ser alterada.');
+        return;
+      }
+
       await firestore.collection('suporte').doc(id).update({
         status: novoStatus,
+        finalizada: novoStatus === 'resolvido',
         data: new Date(),
       });
 
@@ -82,7 +92,11 @@ export default function Denuncias() {
         setSuporteSelecionado({ ...suporteSelecionado, status: novoStatus as any });
       }
 
-      Alert.alert('Sucesso', `Status alterado para "${novoStatus}"!`);
+      const mensagemSucesso = novoStatus === 'resolvido'
+        ? 'Denúncia marcada como resolvida e finalizada.'
+        : `Status alterado para "${novoStatus}"!`;
+
+      Alert.alert('Sucesso', mensagemSucesso);
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
       Alert.alert('Erro', 'Falha ao atualizar status');
@@ -91,6 +105,7 @@ export default function Denuncias() {
 
   const abrirDetalhes = async (suporte: Suporte) => {
     setSuporteSelecionado(suporte);
+    setNovaMensagem('');
     setModalVisible(true);
     await carregarMensagens(suporte.id!);
   };
@@ -123,6 +138,11 @@ export default function Denuncias() {
   const enviarMensagem = async () => {
     if (!novaMensagem.trim() || !suporteSelecionado?.id) {
       Alert.alert('Erro', 'Digite uma mensagem');
+      return;
+    }
+
+    if (suporteSelecionado.status === 'resolvido') {
+      Alert.alert('Denúncia finalizada', 'Esta denúncia já foi resolvida e não pode mais receber mensagens.');
       return;
     }
 
@@ -183,7 +203,16 @@ export default function Denuncias() {
   };
 
   const getTipoEmoji = (tipo: string) => {
-    return tipo === 'denúncia' ? '🚨' : '⚙️';
+    switch (tipo) {
+      case 'denúncia':
+        return '🚨';
+      case 'problema':
+        return '⚙️';
+      case 'outros':
+        return '❓';
+      default:
+        return '📝';
+    }
   };
 
   const formatarData = (data: Date) => {
@@ -195,6 +224,8 @@ export default function Denuncias() {
       minute: '2-digit',
     }).format(data);
   };
+
+  const isFinalizada = (status: string) => status === 'resolvido';
 
   const renderCard = ({ item }: { item: Suporte }) => (
     <View style={[styles.card, styles.denunciaCard, { borderLeftColor: getStatusColor(item.status) }]}> 
@@ -230,7 +261,9 @@ export default function Denuncias() {
 
       <TouchableOpacity style={[styles.button, styles.cardButton]} onPress={() => abrirDetalhes(item)}>
         <Ionicons name="eye" size={16} color="#fff" />
-        <Text style={[styles.buttonText, { marginLeft: 6 }]}>Detalhar</Text>
+        <Text style={[styles.buttonText, { marginLeft: 6 }]}>
+          {isFinalizada(item.status) ? 'Visualizar' : 'Detalhar'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -291,6 +324,27 @@ export default function Denuncias() {
 
             {suporteSelecionado && (
               <>
+                {isFinalizada(suporteSelecionado.status) && (
+                  <View
+                    style={[
+                      styles.modalSection,
+                      styles.denunciaModalSection,
+                      {
+                        backgroundColor: 'rgba(5,242,175,0.12)',
+                        borderLeftWidth: 3,
+                        borderLeftColor: themeColors.success,
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
+                      Denúncia finalizada
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Esta denúncia foi marcada como resolvida e não pode mais ser alterada.
+                    </Text>
+                  </View>
+                )}
+
                 {/* Informações Básicas */}
                 <View style={[styles.modalSection, styles.denunciaModalSection]}>
                   <Text style={[styles.cardTitle, styles.denunciaCardTitle]}>
@@ -337,31 +391,37 @@ export default function Denuncias() {
                 <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
                   Alterar Status
                 </Text>
-                <View style={styles.rowWrap}>
-                  {['aberto', 'em análise', 'resolvido', 'fechado'].map((status) => (
-                    <TouchableOpacity
-                      key={status}
-                      style={[
-                        styles.statusChip,
-                        {
-                          backgroundColor: suporteSelecionado.status === status ? getStatusColor(status) : themeColors.card,
-                        },
-                      ]}
-                      onPress={() => atualizarStatus(suporteSelecionado.id!, status)}
-                    >
-                      <Text
+                {isFinalizada(suporteSelecionado.status) ? (
+                  <Text style={styles.modalText}>
+                    Status bloqueado porque a denúncia já foi finalizada.
+                  </Text>
+                ) : (
+                  <View style={styles.rowWrap}>
+                    {['aberto', 'em análise', 'resolvido', 'fechado'].map((status) => (
+                      <TouchableOpacity
+                        key={status}
                         style={[
-                          styles.statusChipText,
+                          styles.statusChip,
                           {
-                            color: suporteSelecionado.status === status ? themeColors.white : themeColors.textPrimary,
+                            backgroundColor: suporteSelecionado.status === status ? getStatusColor(status) : themeColors.card,
                           },
                         ]}
+                        onPress={() => atualizarStatus(suporteSelecionado.id!, status)}
                       >
-                        {getStatusEmoji(status)} {status}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                        <Text
+                          style={[
+                            styles.statusChipText,
+                            {
+                              color: suporteSelecionado.status === status ? themeColors.white : themeColors.textPrimary,
+                            },
+                          ]}
+                        >
+                          {getStatusEmoji(status)} {status}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
 
                 {/* Mensagens */}
                 <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
@@ -430,39 +490,43 @@ export default function Denuncias() {
                   </View>
                 )}
 
-                {/* Enviar Mensagem */}
-                <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
-                  Enviar Mensagem
-                </Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    styles.textArea,
-                    { marginBottom: 12 },
-                  ]}
-                  placeholder="Digite sua mensagem..."
-                  placeholderTextColor="#999"
-                  multiline
-                  numberOfLines={3}
-                  value={novaMensagem}
-                  onChangeText={setNovaMensagem}
-                  editable={!enviandoMensagem}
-                />
+                {!isFinalizada(suporteSelecionado.status) && (
+                  <>
+                    {/* Enviar Mensagem */}
+                    <Text style={[styles.label, styles.denunciaLabel, { marginBottom: 8 }]}>
+                      Enviar Mensagem
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        styles.textArea,
+                        { marginBottom: 12 },
+                      ]}
+                      placeholder="Digite sua mensagem..."
+                      placeholderTextColor="#999"
+                      multiline
+                      numberOfLines={3}
+                      value={novaMensagem}
+                      onChangeText={setNovaMensagem}
+                      editable={!enviandoMensagem}
+                    />
 
-                <TouchableOpacity
-                  style={[
-                    styles.botao,
-                    { opacity: enviandoMensagem ? 0.6 : 1, marginBottom: 12 },
-                  ]}
-                  onPress={enviarMensagem}
-                  disabled={enviandoMensagem}
-                >
-                  {enviandoMensagem ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.textoBotao}>Enviar Mensagem</Text>
+                    <TouchableOpacity
+                      style={[
+                        styles.botao,
+                        { opacity: enviandoMensagem ? 0.6 : 1, marginBottom: 12 },
+                      ]}
+                      onPress={enviarMensagem}
+                      disabled={enviandoMensagem}
+                    >
+                      {enviandoMensagem ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.textoBotao}>Enviar Mensagem</Text>
+                      )}
+                    </TouchableOpacity>
+                  </>
                   )}
-                </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[

@@ -117,6 +117,10 @@ export default function Suporte() {
                 setTipo(itemValue as 'denúncia' | 'problema' | 'outros')
               }
               style={styles.pickerStyle}
+              dropdownIconColor="#E8F8FF"
+              enabled={!carregando}
+              mode="dropdown"
+              itemStyle={{ color: '#051F40' }}
             >
               <Picker.Item label="Problema técnico" value="problema" />
               <Picker.Item label="Denúncia" value="denúncia" />
@@ -151,6 +155,7 @@ export default function Suporte() {
             placeholderTextColor="#999"
             multiline
             numberOfLines={6}
+            maxLength={500}
             value={descricao}
             onChangeText={setDescricao}
             editable={!carregando}
