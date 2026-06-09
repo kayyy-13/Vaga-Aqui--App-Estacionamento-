@@ -26,6 +26,12 @@ export default function Admin() {
   const [vagasOcupadas, setVagasOcupadas] = useState(0);
   const [reservasDia, setReservasDia] = useState(0);
   const [denunciasPendentes, setDenunciasPendentes] = useState(0);
+  const [denunciasResumo, setDenunciasResumo] = useState({
+    novas: 0,
+    emAnalise: 0,
+    finalizadas: 0,
+    total: 0,
+  });
   const [ruaMaisUtilizada, setRuaMaisUtilizada] = useState('Sem dados');
   const [atividades, setAtividades] = useState<Atividade[]>([]);
 
@@ -43,17 +49,35 @@ export default function Admin() {
       );
     };
 
+    const reservaEstaAtiva = (reserva: Resvaga) => {
+      const statusReserva = reserva.statusReserva || 'ativa';
+
+      if (statusReserva === 'cancelada' || statusReserva === 'expirada') {
+        return false;
+      }
+
+      if (reserva.expiraEm) {
+        return reserva.expiraEm > Date.now();
+      }
+
+      return statusReserva === 'ativa';
+    };
+
     const atualizarResumoReservas = () => {
       const hoje = new Date().toLocaleDateString('pt-BR');
       const usoPorRua: Record<string, number> = {};
+      const vagasOcupadasAtivas = new Set<string>();
       let dia = 0;
 
       atividadesReservas = reservasCache.map(({ id, reserva }) => {
-        const statusReserva = reserva.statusReserva || 'ativa';
-        const reservaAtiva = statusReserva === 'ativa' && reserva.expiraEm > Date.now();
+        const reservaAtiva = reservaEstaAtiva(reserva);
         const rua = vagasPorId[reserva.idVaga]?.rua || 'Rua não identificada';
 
         usoPorRua[rua] = (usoPorRua[rua] || 0) + 1;
+
+        if (reservaAtiva && reserva.idVaga) {
+          vagasOcupadasAtivas.add(reserva.idVaga);
+        }
 
         if (reserva.data === hoje && reservaAtiva) {
           dia++;
@@ -70,6 +94,7 @@ export default function Admin() {
       });
 
       const ruaMaisUsada = Object.entries(usoPorRua).sort((a, b) => b[1] - a[1])[0];
+      setVagasOcupadas(vagasOcupadasAtivas.size);
       setReservasDia(dia);
       setRuaMaisUtilizada(ruaMaisUsada ? `${ruaMaisUsada[0]} (${ruaMaisUsada[1]})` : 'Sem dados');
       atualizarAtividades();
@@ -78,7 +103,6 @@ export default function Admin() {
     const unsubscribeRuas = firestore.collection('Ruas').onSnapshot(
       (snapshot) => {
         const vagas: Record<string, VagaResumo> = {};
-        let ocupadasAgora = 0;
 
         snapshot.forEach((doc) => {
           const data = doc.data();
@@ -88,14 +112,10 @@ export default function Admin() {
             status,
           };
 
-          if (status !== 'livre') {
-            ocupadasAgora++;
-          }
         });
 
         vagasPorId = vagas;
         setTotalVagas(snapshot.size);
-        setVagasOcupadas(ocupadasAgora);
         atualizarResumoReservas();
       },
       (error) => {
@@ -119,29 +139,41 @@ export default function Admin() {
 
     const unsubscribeDenuncias = firestore.collection('suporte').onSnapshot(
       (snapshot) => {
-        let pendentes = 0;
+        const resumo = {
+          novas: 0,
+          emAnalise: 0,
+          finalizadas: 0,
+          total: snapshot.size,
+        };
 
         atividadesDenuncias = snapshot.docs.map((doc) => {
           const denuncia = doc.data();
           const status = denuncia.status || 'aberto';
+          const statusNormalizado = status.toLowerCase();
           const tipo = denuncia.tipo || 'denúncia';
           const data = denuncia.data?.toDate?.()?.getTime?.() || Date.now();
+          const finalizada = statusNormalizado === 'resolvido' || statusNormalizado === 'fechado';
 
-          if (status !== 'resolvido' && status !== 'fechado') {
-            pendentes++;
+          if (statusNormalizado === 'em análise' || statusNormalizado === 'em analise') {
+            resumo.emAnalise++;
+          } else if (finalizada) {
+            resumo.finalizadas++;
+          } else {
+            resumo.novas++;
           }
 
           return {
             id: `denuncia-${doc.id}`,
-            titulo: status === 'resolvido' ? 'Denúncia resolvida' : 'Denúncia recebida',
+            titulo: finalizada ? 'Denúncia finalizada' : 'Denúncia recebida',
             descricao: `${tipo} • ${status}`,
             data,
-            icon: status === 'resolvido' ? 'checkmark-circle' : 'alert-circle',
-            color: status === 'resolvido' ? themeColors.success : themeColors.warning,
+            icon: finalizada ? 'checkmark-circle' : 'alert-circle',
+            color: finalizada ? themeColors.success : themeColors.warning,
           };
         });
 
-        setDenunciasPendentes(pendentes);
+        setDenunciasPendentes(resumo.novas + resumo.emAnalise);
+        setDenunciasResumo(resumo);
         atualizarAtividades();
       },
       (error) => {
@@ -165,10 +197,10 @@ export default function Admin() {
   }, [totalVagas, vagasOcupadas]);
 
   const chartItems = [
-    { label: 'Livres', value: Math.max(totalVagas - vagasOcupadas, 0), color: themeColors.success },
-    { label: 'Ocupadas', value: vagasOcupadas, color: themeColors.danger },
-    { label: 'Reservas', value: reservasDia, color: themeColors.secondary },
-    { label: 'Pendentes', value: denunciasPendentes, color: themeColors.warning },
+    { label: 'Novas', value: denunciasResumo.novas, color: themeColors.warning },
+    { label: 'Em análise', value: denunciasResumo.emAnalise, color: themeColors.secondary },
+    { label: 'Finalizadas', value: denunciasResumo.finalizadas, color: themeColors.success },
+    { label: 'Total', value: denunciasResumo.total, color: themeColors.accent1 },
   ];
 
   const maxChartValue = Math.max(...chartItems.map((item) => item.value), 1);
@@ -233,8 +265,8 @@ export default function Admin() {
 
       <View style={styles.adminPanel}>
         <View style={styles.adminSectionHeader}>
-          <Text style={styles.adminSectionTitle}>Visão geral</Text>
-          <Text style={styles.adminSectionMeta}>{taxaOcupacao}% ocupação</Text>
+          <Text style={styles.adminSectionTitle}>Visão geral das denúncias</Text>
+          <Text style={styles.adminSectionMeta}>{denunciasResumo.total} no total</Text>
         </View>
 
         <View style={styles.adminChart}>

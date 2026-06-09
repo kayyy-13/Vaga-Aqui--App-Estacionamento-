@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, View, KeyboardAvoidingView, TouchableOpacity, FlatList } from 'react-native';
+import { Alert, Text, View, KeyboardAvoidingView, TouchableOpacity, FlatList } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
 import styles, { themeColors } from '../estilo';
@@ -191,6 +191,50 @@ export default function CadastroRua() {
     return true;
   };
 
+  const excluirRua = async () => {
+    if (!ruaOriginal) {
+      alert('Selecione uma rua para excluir.');
+      return;
+    }
+
+    Alert.alert(
+      'Excluir rua',
+      `Deseja excluir a rua ${ruaOriginal} e todas as suas vagas livres?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const refRua = firestore.collection("Ruas");
+              const ruasSnapshot = await refRua.where('rua', '==', ruaOriginal).get();
+
+              if (ruasSnapshot.empty) {
+                alert('Não foi possível localizar a rua para exclusão.');
+                return;
+              }
+
+              const vagasOcupadas = ruasSnapshot.docs.filter((doc) => (doc.data()?.status || 'livre') !== 'livre');
+
+              if (vagasOcupadas.length > 0) {
+                alert(`Não é possível excluir esta rua porque existem ${vagasOcupadas.length} vaga(s) ocupada(s).`);
+                return;
+              }
+
+              await Promise.all(ruasSnapshot.docs.map((doc) => refRua.doc(doc.id).delete()));
+              alert('Rua excluída com sucesso!');
+              limparFormulario();
+            } catch (error) {
+              console.error('Erro ao excluir rua:', error);
+              alert('Erro ao excluir rua.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const salvar = async () => {
     const refRua = firestore.collection("Ruas")
     const quantidade = parseInt(formRua.vaga || '0', 10);
@@ -273,12 +317,21 @@ export default function CadastroRua() {
             <Text style={styles.buttonText}>{ruaOriginal ? '✅ Atualizar Rua' : '✅ Salvar'}</Text>
           </TouchableOpacity>
           {ruaOriginal ? (
-            <TouchableOpacity
-              style={[styles.button, styles.buttonSecondary]}
-              onPress={limparFormulario}
-            >
-              <Text style={styles.buttonSecondaryText}>Cancelar edição</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonDelete, { flex: 0 }]}
+                onPress={excluirRua}
+              >
+                <Text style={styles.buttonText}>Excluir rua</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.buttonSecondary]}
+                onPress={limparFormulario}
+              >
+                <Text style={styles.buttonSecondaryText}>Cancelar edição</Text>
+              </TouchableOpacity>
+            </>
           ) : null}
         </View>
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, FlatList, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
-import styles from '../estilo';
+import styles, { themeColors } from '../estilo';
 
 interface Veiculo {
   id: string;
@@ -99,66 +100,85 @@ export default function VehicleRegistration() {
   };
 
   return (
-    <View style={styles.profileContainer}>
-      <View style={styles.backButtonContainer}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonRow}>
-          <Text style={styles.backButtonText}>Voltar</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.vehicleScreen}>
+      <ScrollView contentContainerStyle={styles.vehicleContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.vehicleHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.vehicleBackButton}>
+            <Ionicons name="arrow-back" size={22} color={themeColors.secondary} />
+          </TouchableOpacity>
+          <View style={styles.vehicleHeaderText}>
+            <Text style={styles.vehicleTitle}>Cadastro de Veículo</Text>
+            <Text style={styles.vehicleSubtitle}>Gerencie os veículos ligados à sua conta</Text>
+          </View>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.titulo}>🚗 Cadastro de Veículo</Text>
-
-        <View style={styles.inputView}>
+        <View style={styles.vehicleFormCard}>
           <TextInput
             label="Placa"
             value={placa}
             onChangeText={setPlaca}
-            style={styles.input}
+            style={[styles.input, styles.vehicleInput]}
             autoCapitalize="characters"
             maxLength={7}
+            activeUnderlineColor={themeColors.accent1}
           />
 
           <TextInput
             label="Modelo"
             value={modelo}
             onChangeText={setModelo}
-            style={styles.input}
+            style={[styles.input, styles.vehicleInput]}
+            activeUnderlineColor={themeColors.accent1}
           />
 
           <TextInput
             label="Cor"
             value={cor}
             onChangeText={setCor}
-            style={styles.input}
+            style={[styles.input, styles.vehicleInput]}
+            activeUnderlineColor={themeColors.accent1}
           />
 
-          <TouchableOpacity style={styles.button} onPress={adicionarVeiculo}>
-            <Text style={styles.buttonText}>➕ Adicionar veículo</Text>
+          <TouchableOpacity style={styles.vehiclePrimaryButton} onPress={adicionarVeiculo}>
+            <Ionicons name="add-circle" size={20} color={themeColors.white} />
+            <Text style={styles.buttonText}>Adicionar veículo</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={[styles.titulo, { fontSize: 20, marginTop: 20, marginBottom: 10 }]}>Meus Veículos</Text>
+        <View style={styles.vehicleSectionHeader}>
+          <Text style={styles.vehicleSectionTitle}>Meus Veículos</Text>
+          <Text style={styles.vehicleCount}>{veiculos.length}</Text>
+        </View>
 
-        <FlatList
-          data={veiculos}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.listItem}>
-              <Text style={styles.listText}>Placa: {item.placa}</Text>
-              <Text style={styles.listText}>Modelo: {item.modelo}</Text>
-              <Text style={styles.listText}>Cor: {item.cor}</Text>
+        <View style={styles.vehicleList}>
+          {veiculos.length === 0 ? (
+            <View style={styles.vehicleEmptyCard}>
+              <Ionicons name="car-outline" size={34} color={themeColors.textSecondary} />
+              <Text style={styles.vehicleEmptyText}>Nenhum veículo cadastrado.</Text>
+            </View>
+          ) : (
+            veiculos.map((item) => (
+              <View key={item.id} style={styles.vehicleCard}>
+                <View style={styles.vehicleCardIcon}>
+                  <Ionicons name="car" size={24} color={themeColors.accent2} />
+                </View>
+
+                <View style={styles.vehicleCardInfo}>
+                  <Text style={styles.vehiclePlate}>{item.placa}</Text>
+                  <Text style={styles.vehicleDetail}>Modelo: {item.modelo}</Text>
+                  <Text style={styles.vehicleDetail}>Cor: {item.cor}</Text>
+                </View>
+
               <TouchableOpacity
-                style={[styles.button, styles.buttonDelete, { marginTop: 10 }]}
+                style={styles.vehicleDeleteButton}
                 onPress={() => excluirVeiculo(item.id)}
               >
-                <Text style={styles.buttonText}>Excluir</Text>
+                  <Ionicons name="trash" size={18} color={themeColors.white} />
               </TouchableOpacity>
             </View>
+            ))
           )}
-          ListEmptyComponent={<Text style={styles.text}>Nenhum veículo cadastrado.</Text>}
-          scrollEnabled={false}
-        />
+        </View>
       </ScrollView>
     </View>
   );

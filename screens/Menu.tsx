@@ -80,6 +80,7 @@ export default function Menu() {
                     shadowRadius: 8,
                 },
                 tabBarItemStyle: {
+                    flex: 1,
                     paddingVertical: 2,
                     minWidth: 0,
                 },
@@ -156,7 +157,10 @@ export default function Menu() {
                     <Tab.Screen
                         name='Gerenciar Usuários'
                         component={UserManagement}
-                        options={{ tabBarButton: () => null }}
+                        options={{
+                            tabBarButton: () => null,
+                            tabBarItemStyle: { display: 'none' },
+                        }}
                     />
                 )}
 
@@ -164,7 +168,10 @@ export default function Menu() {
                     <Tab.Screen
                         name='Reservas do App'
                         component={ReservaListar2}
-                        options={{ tabBarButton: () => null }}
+                        options={{
+                            tabBarButton: () => null,
+                            tabBarItemStyle: { display: 'none' },
+                        }}
                     />
                 )}
 
@@ -173,7 +180,10 @@ export default function Menu() {
                         <Tab.Screen
                             name='Cadastro de Ruas'
                             component={Rua}
-                            options={{ tabBarButton: () => null }}
+                            options={{
+                                tabBarButton: () => null,
+                                tabBarItemStyle: { display: 'none' },
+                            }}
                         />
                     </>
                 )}
